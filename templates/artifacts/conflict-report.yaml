@@ -1,0 +1,20 @@
+schema_version: 1.0.0
+generated_at: "2026-01-01T00:00:00Z"
+source_phase: phase_04_cross_critique_round
+conflicts:
+  - conflict_id: CONFLICT-001
+    plan_a_id: PLAN-ARCH-002
+    plan_b_id: PLAN-SEC-002
+    contradiction_type: tech_stack
+    severity: critical
+    description: ""
+    resolution_options:
+      - option_id: OPT-001
+        option: ""
+        tradeoffs:
+          - ""
+        preferred_when: ""
+    impacted_requirements:
+      - REQ-001
+open_conflicts:
+  - CONFLICT-001

@@ -1,0 +1,21 @@
+schema_version: 1.0.0
+generated_at: "2026-01-01T00:00:00Z"
+source_phase: phase_12_documentation_pack
+documentation_pack:
+  version: 1.0.0
+  summary: ""
+  artifact_index:
+    - name: spec
+      path: artifacts/spec.yaml
+    - name: master_plan
+      path: artifacts/consensus/master-plan.yaml
+    - name: adr_log
+      path: artifacts/consensus/adr-log.yaml
+    - name: use_case_catalog
+      path: artifacts/use-cases/use-case-catalog.yaml
+    - name: sequence_definitions
+      path: artifacts/sequences/sequence-definitions.yaml
+    - name: test_matrix
+      path: artifacts/tests/test-matrix.yaml
+    - name: traceability_matrix
+      path: artifacts/validation/traceability-matrix.yaml

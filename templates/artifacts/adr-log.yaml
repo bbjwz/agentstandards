@@ -1,0 +1,34 @@
+schema_version: 1.0.0
+generated_at: "2026-01-01T00:00:00Z"
+source_phase: phase_06_consensus_synthesis
+decisions:
+  - adr_id: ADR-001
+    title: ""
+    status: accepted
+    context: ""
+    options:
+      - option_id: OPT-001
+        name: ""
+        pros:
+          - ""
+        cons:
+          - ""
+        source_plan_ids:
+          - PLAN-ARCH-002
+    decision: OPT-001
+    accepted_decision: ""
+    rejected_decisions:
+      - option_id: OPT-002
+        reason: ""
+    unresolved_tradeoffs:
+      - ""
+    consequences:
+      - ""
+    revisit_trigger: ""
+    owner: consensus-synthesizer
+    related_requirements:
+      - REQ-001
+    related_use_cases:
+      - UC-001
+    related_tests:
+      - TEST-UC-001-E2E-001

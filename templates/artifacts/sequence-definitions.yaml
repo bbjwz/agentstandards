@@ -1,0 +1,26 @@
+schema_version: 1.0.0
+generated_at: "2026-01-01T00:00:00Z"
+source_phase: phase_09_sequence_generation
+sequences:
+  - sequence_id: SEQ-001
+    use_case_id: UC-001
+    title: ""
+    participants:
+      - participant_id: P-001
+        name: Customer
+        type: actor
+      - participant_id: P-002
+        name: Frontend
+        type: service
+    interactions:
+      - step: 1
+        from: Customer
+        to: Frontend
+        action: Submit request
+        message_type: sync
+        error_behavior: ""
+    failure_paths:
+      - path_id: FP-001
+        trigger: ""
+        behavior: ""
+    mermaid_file: artifacts/sequences/diagrams/seq-001.mmd

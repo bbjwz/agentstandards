@@ -9,6 +9,8 @@ These instructions apply to the full repository.
 - Limit the scope of your work to exactly the task at hand. When in doubt, ask for clarification before proceeding.
 - Always aim for a modular design
 - Aim for NASA 10 rules coding standards
+- For architecture pipeline work, enforce deterministic phases and strict fail gates defined in .github/agents/AGENTS.md.
+- Do not bypass schema contracts in templates/artifacts when generating phase outputs.
 
 ## Coding Standards
 - Keep changes minimal and targeted; avoid unrelated refactors.
@@ -44,4 +46,9 @@ These instructions apply to the full repository.
 ## Documentation
 - When adding significant functionality, append README with a concise "what was added" summary.
 - Keep docs/ai-testing.md aligned with script behavior and environment variables.
+
+## Pipeline Template Guardrails
+- Keep structured adversarial review behavior intact: no open-ended debates.
+- Preserve explicit accepted_decisions, rejected_decisions, unresolved_tradeoffs outputs in consensus artifacts.
+- Preserve full Requirement -> Use Case -> Sequence -> Test traceability expectations.
 

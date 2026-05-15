@@ -1,0 +1,38 @@
+schema_version: 1.0.0
+generated_at: "2026-01-01T00:00:00Z"
+source_phase: phase_08_use_case_generation
+use_cases:
+  - use_case_id: UC-001
+    title: ""
+    requirement_ids:
+      - REQ-001
+    actors:
+      - actor_id: ACT-001
+        name: ""
+    preconditions:
+      - ""
+    happy_path:
+      - step: 1
+        actor: ""
+        action: ""
+        system_response: ""
+    edge_cases:
+      - case_id: EDGE-001
+        description: ""
+        expected_behavior: ""
+    failure_cases:
+      - case_id: FAIL-001
+        description: ""
+        recovery_behavior: ""
+    concurrency_scenarios:
+      - scenario_id: CONC-001
+        description: ""
+    security_misuse_cases:
+      - misuse_id: MIS-001
+        description: ""
+        mitigation: ""
+    rollback_scenarios:
+      - rollback_id: RB-001
+        description: ""
+    acceptance_criteria:
+      - ""

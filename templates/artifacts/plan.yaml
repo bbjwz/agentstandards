@@ -1,0 +1,43 @@
+schema_version: 1.0.0
+generated_at: "2026-01-01T00:00:00Z"
+source_phase: phase_01_parallel_planning
+plan_id: PLAN-ARCH-001
+persona: systems-architect
+requirement_ids:
+  - REQ-001
+architecture_decisions:
+  - decision_id: DEC-001
+    requirement_ids:
+      - REQ-001
+    decision: ""
+    rationale: ""
+    tradeoffs:
+      - ""
+components:
+  - component_id: CMP-001
+    name: ""
+    responsibility: ""
+    dependencies:
+      - ""
+data_model:
+  - entity_id: ENT-001
+    name: ""
+    attributes:
+      - name: ""
+        type: ""
+        constraints:
+          - ""
+risk_register:
+  - risk_id: RISK-001
+    description: ""
+    likelihood: 3
+    impact: 3
+    mitigation: ""
+hidden_assumptions:
+  - assumption_id: ASM-001
+    description: ""
+    validation_required: true
+implementation_complexity: 5
+confidence_score: 70
+notes:
+  - ""

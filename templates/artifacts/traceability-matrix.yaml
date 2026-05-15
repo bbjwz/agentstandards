@@ -1,0 +1,27 @@
+schema_version: 1.0.0
+generated_at: "2026-01-01T00:00:00Z"
+source_phase: phase_11_coverage_validation
+requirements:
+  - requirement_id: REQ-001
+    use_case_ids:
+      - UC-001
+    sequence_ids:
+      - SEQ-001
+    test_ids:
+      - TEST-UC-001-E2E-001
+    coverage_status: covered
+reverse_trace:
+  - test_id: TEST-UC-001-E2E-001
+    sequence_ids:
+      - SEQ-001
+    use_case_ids:
+      - UC-001
+    requirement_ids:
+      - REQ-001
+gaps:
+  - gap_id: GAP-001
+    type: missing_test
+    requirement_id: REQ-010
+    severity: critical
+    remediation: ""
+overall_status: PASS

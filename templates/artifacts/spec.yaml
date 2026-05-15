@@ -1,0 +1,33 @@
+schema_version: 1.0.0
+generated_at: "2026-01-01T00:00:00Z"
+source_phase: phase_00_spec_ingestion
+scope:
+  name: ""
+  summary: ""
+actors:
+  - actor_id: ACT-001
+    name: ""
+    role: ""
+requirements:
+  - requirement_id: REQ-001
+    title: ""
+    description: ""
+    priority: critical
+    success_criteria:
+      - ""
+constraints:
+  - constraint_id: CON-001
+    type: technical
+    description: ""
+non_goals:
+  - ""
+acceptance_criteria:
+  - acceptance_id: ACC-001
+    requirement_id: REQ-001
+    given: ""
+    when: ""
+    then: ""
+open_questions:
+  - question_id: Q-001
+    text: ""
+    impact: medium

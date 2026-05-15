@@ -1,0 +1,37 @@
+schema_version: 1.0.0
+generated_at: "2026-01-01T00:00:00Z"
+source_phase: phase_06_consensus_synthesis
+master_plan_id: MASTER-001
+accepted_decisions:
+  - decision_id: MDEC-001
+    decision: ""
+    source_plan_ids:
+      - PLAN-ARCH-002
+    rationale: ""
+rejected_decisions:
+  - decision_id: MDEC-002
+    decision: ""
+    rejection_reason: ""
+unresolved_tradeoffs:
+  - tradeoff_id: TO-001
+    description: ""
+    owner: systems-architect
+    next_action: ""
+components:
+  - component_id: CMP-001
+    name: ""
+    responsibility: ""
+    source_decisions:
+      - MDEC-001
+data_model:
+  - entity_id: ENT-001
+    name: ""
+    fields:
+      - name: ""
+        type: ""
+risk_posture:
+  overall_level: medium
+  residual_risks:
+    - risk_id: RISK-001
+      description: ""
+      mitigation_status: in_progress
