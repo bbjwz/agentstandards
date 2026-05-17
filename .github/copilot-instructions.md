@@ -44,8 +44,8 @@ These instructions apply to the full repository.
 - Use environment variables and platform secret stores (GitHub Secrets, Azure app settings).
 
 ## Documentation
-- When adding significant functionality, append README with a concise "what was added" summary.
-- Keep docs/ai-testing.md aligned with script behavior and environment variables.
+- When adding or changing anything, update README to reflect the current state of the project.
+- When adding functionality, append README with a concise "what was added" summary.
 
 ## Pipeline Template Guardrails
 - Keep structured adversarial review behavior intact: no open-ended debates.
