@@ -32,13 +32,13 @@ Provide reusable repository components so new projects can execute a determinist
 ### Components
 - Phase registry and mapping: AGENTS phase list plus slash-command mapping. Evidence: .github/agents/AGENTS.md:15, .github/agents/AGENTS.md:30
 - Skills: one orchestration skill plus phase skills. Evidence: docs/skills-catalog.md:5, docs/skills-catalog.md:10
-- Prompts: phase procedures with hard-fail conditions. Evidence: .github/prompts/phase-00-ingest-spec.prompt.md:22, .github/prompts/phase-06-consensus-synthesis.prompt.md:25, .github/prompts/validate-coverage.prompt.md:25
+- Prompts: phase procedures with hard-fail conditions. Evidence: .github/prompts/phase-00-ingest-spec.prompt.md:22, .github/prompts/phase-06-consensus-synthesis.prompt.md:25, .github/prompts/phase-11-coverage-validation.prompt.md:25
 - Templates: typed artifact skeletons for all phases. Evidence: README.md:67, templates/artifacts/documentation-pack.yaml:7
 
 ### Dependencies
 - Skills depend on prompts and templates. Evidence: docs/skills-catalog.md:11, docs/skills-catalog.md:12, docs/skills-catalog.md:13
-- Prompts depend on upstream artifacts from previous phases. Evidence: .github/prompts/generate-use-cases.prompt.md:10, .github/prompts/generate-sequences.prompt.md:10, .github/prompts/generate-tests.prompt.md:10
-- Validation phases depend on full upstream chain. Evidence: .github/prompts/validate-coverage.prompt.md:10, .github/skills/phase-coverage-validation/SKILL.md:12
+- Prompts depend on upstream artifacts from previous phases. Evidence: .github/prompts/phase-08-use-case-generation.prompt.md:10, .github/prompts/phase-09-sequence-generation.prompt.md:10, .github/prompts/phase-10-test-scenario-generation.prompt.md:10
+- Validation phases depend on full upstream chain. Evidence: .github/prompts/phase-11-coverage-validation.prompt.md:10, .github/skills/phase-coverage-validation/SKILL.md:12
 
 ### Data flow
 1. Spec ingestion creates artifacts/spec.yaml. Evidence: .github/agents/AGENTS.md:48, .github/prompts/phase-00-ingest-spec.prompt.md:13
@@ -64,9 +64,9 @@ Failure modes: gate fail on missing links or unresolved blockers. Evidence: .git
 
 ### Prompt procedures
 Responsibilities: detailed procedural execution for each phase. Evidence: docs/skills-catalog.md:11, docs/skills-catalog.md:50
-Inputs: upstream artifacts as declared per phase. Evidence: .github/prompts/generate-sequences.prompt.md:10, .github/prompts/generate-tests.prompt.md:10
-Outputs: schema-conformant YAML artifacts and Mermaid files where applicable. Evidence: .github/prompts/generate-sequences.prompt.md:15, .github/prompts/generate-tests.prompt.md:16
-Failure modes: explicit hard-fail conditions per prompt. Evidence: .github/prompts/phase-00-ingest-spec.prompt.md:22, .github/prompts/generate-tests.prompt.md:33, .github/prompts/validate-coverage.prompt.md:25
+Inputs: upstream artifacts as declared per phase. Evidence: .github/prompts/phase-09-sequence-generation.prompt.md:10, .github/prompts/phase-10-test-scenario-generation.prompt.md:10
+Outputs: schema-conformant YAML artifacts and Mermaid files where applicable. Evidence: .github/prompts/phase-09-sequence-generation.prompt.md:15, .github/prompts/phase-10-test-scenario-generation.prompt.md:16
+Failure modes: explicit hard-fail conditions per prompt. Evidence: .github/prompts/phase-00-ingest-spec.prompt.md:22, .github/prompts/phase-10-test-scenario-generation.prompt.md:33, .github/prompts/phase-11-coverage-validation.prompt.md:25
 
 ### Artifact contracts
 Responsibilities: stable data model across phases, ID continuity, and traceability. Evidence: .github/instructions/schema-standards.instructions.md:27, .github/instructions/schema-standards.instructions.md:29, .github/instructions/schema-standards.instructions.md:38
@@ -90,7 +90,7 @@ Failure modes: missing required keys, invalid references, broken chain mapping. 
 
 ### Integrations
 - Intra-repo integration is through file contracts and phase dependencies.
-- No external integration connector files are defined in this repository template. Evidence: .github/prompts/generate-use-cases.prompt.md:10, .github/prompts/validate-coverage.prompt.md:10
+- No external integration connector files are defined in this repository template. Evidence: .github/prompts/phase-08-use-case-generation.prompt.md:10, .github/prompts/phase-11-coverage-validation.prompt.md:10
 
 ## APIs and contracts
 ### Interfaces
@@ -149,7 +149,7 @@ Failure modes: missing required keys, invalid references, broken chain mapping. 
 ### Reliability behavior
 - Fail-fast behavior is explicit at both instruction and runbook levels. Evidence: .github/instructions/pipeline-core.instructions.md:15, docs/pipeline-runbook.md:43
 - Iteration limits reduce runaway loops. Evidence: .github/instructions/pipeline-core.instructions.md:20
-- Coverage validation enforces end-to-end chain integrity. Evidence: .github/prompts/validate-coverage.prompt.md:20, .github/prompts/validate-coverage.prompt.md:25
+- Coverage validation enforces end-to-end chain integrity. Evidence: .github/prompts/phase-11-coverage-validation.prompt.md:20, .github/prompts/phase-11-coverage-validation.prompt.md:25
 
 ### Error handling and compensation
 - Architecture validation returns READY or NOT_READY with remediation, enabling corrective re-entry into upstream phases. Evidence: .github/skills/phase-architecture-validation/SKILL.md:24
@@ -172,9 +172,9 @@ Failure modes: missing required keys, invalid references, broken chain mapping. 
 
 ## Testing strategy and current coverage gaps
 ### Strategy
-- Test generation requires unit, integration, contract, e2e, chaos, performance, security, concurrency, recovery, migration. Evidence: .github/prompts/generate-tests.prompt.md:19, templates/artifacts/test-matrix.yaml:4
-- Tests must be linked to REQ, UC, and SEQ IDs. Evidence: .github/prompts/generate-tests.prompt.md:30, templates/artifacts/test-matrix.yaml:19
-- Coverage validation enforces both forward and reverse trace mapping. Evidence: .github/prompts/validate-coverage.prompt.md:20, .github/prompts/validate-coverage.prompt.md:21
+- Test generation requires unit, integration, contract, e2e, chaos, performance, security, concurrency, recovery, migration. Evidence: .github/prompts/phase-10-test-scenario-generation.prompt.md:19, templates/artifacts/test-matrix.yaml:4
+- Tests must be linked to REQ, UC, and SEQ IDs. Evidence: .github/prompts/phase-10-test-scenario-generation.prompt.md:30, templates/artifacts/test-matrix.yaml:19
+- Coverage validation enforces both forward and reverse trace mapping. Evidence: .github/prompts/phase-11-coverage-validation.prompt.md:20, .github/prompts/phase-11-coverage-validation.prompt.md:21
 
 ### Current gaps
 - Repository currently provides templates and procedures; it does not contain concrete executed test suites or coverage reports for a running application.
@@ -249,7 +249,7 @@ Cover-->>Orchestrator: traceability-matrix.yaml PASS
 Orchestrator->>Doc: Generate final pack
 Doc-->>Engineer: final documentation artifacts
 ```
-Evidence: .github/skills/pipeline-orchestrator/SKILL.md:19, .github/prompts/generate-sequences.prompt.md:15, .github/prompts/validate-coverage.prompt.md:20
+Evidence: .github/skills/pipeline-orchestrator/SKILL.md:19, .github/prompts/phase-09-sequence-generation.prompt.md:15, .github/prompts/phase-11-coverage-validation.prompt.md:20
 
 ### Common failure path with retry or compensation behavior
 ```mermaid
@@ -304,9 +304,9 @@ Evidence: .github/skills/phase-coverage-validation/SKILL.md:7, .github/skills/ph
 | Data model and persistence | partial | templates/artifacts/spec.yaml:11; templates/artifacts/adr-log.yaml:4; templates/artifacts/documentation-pack.yaml:7 | no database schema or migration scripts |
 | Configuration and environment behavior | partial | .github/instructions/pipeline-core.instructions.md:11; .github/instructions/schema-standards.instructions.md:13; copilot-instructions.md:30 | no dedicated environment manifest for deploy targets |
 | Security and permission model | partial | copilot-instructions.md:42; .github/instructions/pipeline-core.instructions.md:44 | no app RBAC/authz artifacts |
-| Reliability and observability | partial | .github/instructions/pipeline-core.instructions.md:15; .github/prompts/validate-coverage.prompt.md:25; templates/artifacts/validation-report.yaml:11 | no metrics/tracing/alert definitions |
+| Reliability and observability | partial | .github/instructions/pipeline-core.instructions.md:15; .github/prompts/phase-11-coverage-validation.prompt.md:25; templates/artifacts/validation-report.yaml:11 | no metrics/tracing/alert definitions |
 | Build, deploy, operations notes | partial | docs/pipeline-runbook.md:5; copilot-instructions.md:38 | no CI/CD pipeline or deploy manifests in repo |
-| Testing strategy and current coverage gaps | partial | .github/prompts/generate-tests.prompt.md:19; templates/artifacts/test-matrix.yaml:4 | no concrete executed tests or coverage report |
+| Testing strategy and current coverage gaps | partial | .github/prompts/phase-10-test-scenario-generation.prompt.md:19; templates/artifacts/test-matrix.yaml:4 | no concrete executed tests or coverage report |
 | Risks, assumptions, open questions | complete | .github/instructions/schema-standards.instructions.md:21; .github/agents/AGENTS.md:162 | none |
 | Glossary | complete | docs/skills-catalog.md:53; templates/artifacts/traceability-matrix.yaml:4 | none |
 

@@ -35,16 +35,16 @@ This catalog maps each skill to its pipeline phase and artifact contracts.
    - Prompt: .github/prompts/phase-07-architecture-validation.prompt.md
    - Primary template: templates/artifacts/validation-report.yaml
 9. phase-use-case-generation
-   - Prompt: .github/prompts/generate-use-cases.prompt.md
+   - Prompt: .github/prompts/phase-08-use-case-generation.prompt.md
    - Primary template: templates/artifacts/use-case-catalog.yaml
 10. phase-sequence-generation
-    - Prompt: .github/prompts/generate-sequences.prompt.md
+    - Prompt: .github/prompts/phase-09-sequence-generation.prompt.md
     - Primary template: templates/artifacts/sequence-definitions.yaml
 11. phase-test-generation
-    - Prompt: .github/prompts/generate-tests.prompt.md
+    - Prompt: .github/prompts/phase-10-test-scenario-generation.prompt.md
     - Primary template: templates/artifacts/test-matrix.yaml
 12. phase-coverage-validation
-    - Prompt: .github/prompts/validate-coverage.prompt.md
+    - Prompt: .github/prompts/phase-11-coverage-validation.prompt.md
     - Primary template: templates/artifacts/traceability-matrix.yaml
 13. phase-documentation-pack
     - Prompt: .github/prompts/phase-12-documentation-pack.prompt.md

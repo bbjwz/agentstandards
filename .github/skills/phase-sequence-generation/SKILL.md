@@ -16,7 +16,7 @@ disable-model-invocation: true
 - [sequence template](../../../templates/artifacts/sequence-definitions.yaml)
 
 ## Procedure
-1. Follow [phase prompt](../../prompts/generate-sequences.prompt.md).
+1. Follow [phase prompt](../../prompts/phase-09-sequence-generation.prompt.md).
 2. Define participants and ordered interactions.
 3. Include timeout and error behavior.
 4. Render Mermaid files per critical use case.

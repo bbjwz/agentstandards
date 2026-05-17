@@ -17,7 +17,7 @@ disable-model-invocation: true
 - [test matrix template](../../../templates/artifacts/test-matrix.yaml)
 
 ## Procedure
-1. Follow [phase prompt](../../prompts/generate-tests.prompt.md).
+1. Follow [phase prompt](../../prompts/phase-10-test-scenario-generation.prompt.md).
 2. Generate tests across required dimensions.
 3. Include setup, steps, assertions, and expected outcomes.
 4. Link each test to REQ, UC, and SEQ IDs.

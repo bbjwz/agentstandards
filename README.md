@@ -37,11 +37,12 @@ This template enforces:
 
 ### Prompt Surface
 - Full phase prompts from spec ingestion to final documentation pack under `.github/prompts/`
+- Prompt filenames are phase-prefixed for deterministic ordering (`phase-00` through `phase-12`)
 - Dedicated prompts for:
-	- use-case generation
-	- sequence generation
-	- test generation
-	- coverage validation
+	- use-case generation (`phase-08-use-case-generation.prompt.md`)
+	- sequence generation (`phase-09-sequence-generation.prompt.md`)
+	- test generation (`phase-10-test-scenario-generation.prompt.md`)
+	- coverage validation (`phase-11-coverage-validation.prompt.md`)
 
 ### Skills Surface
 - Full phase skills under `.github/skills/` with standards-compliant `SKILL.md` files

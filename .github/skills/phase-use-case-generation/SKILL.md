@@ -17,7 +17,7 @@ disable-model-invocation: true
 - [use case template](../../../templates/artifacts/use-case-catalog.yaml)
 
 ## Procedure
-1. Follow [phase prompt](../../prompts/generate-use-cases.prompt.md).
+1. Follow [phase prompt](../../prompts/phase-08-use-case-generation.prompt.md).
 2. Generate actor-linked use cases tied to requirement IDs.
 3. Include all required scenario classes.
 4. Keep acceptance criteria explicit.
