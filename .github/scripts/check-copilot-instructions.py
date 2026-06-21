@@ -128,11 +128,17 @@ def fetch_file_text(contents_url: str, token: str) -> str:
     return base64.b64decode(encoded).decode("utf-8", errors="replace")
 
 
-def unified_diff(baseline_path: str, source_path: str, baseline: str, candidate: str) -> str:
+def unified_diff(
+    baseline_repository: str,
+    baseline_path: str,
+    source_path: str,
+    baseline: str,
+    candidate: str,
+) -> str:
     diff = difflib.unified_diff(
         baseline.splitlines(keepends=True),
         candidate.splitlines(keepends=True),
-        fromfile=f"agentstandards/{baseline_path}",
+        fromfile=f"{baseline_repository}/{baseline_path}",
         tofile=source_path,
     )
     return "".join(diff)
@@ -247,6 +253,7 @@ def main() -> int:
                 "repository": candidate["repository"],
                 "path": candidate["path"],
                 "diff": unified_diff(
+                    current_repository,
                     baseline_path,
                     f"{candidate['repository']}/{candidate['path']}",
                     baseline,
@@ -267,7 +274,7 @@ def main() -> int:
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(main())
+        sys.exit(main())
     except GitHubApiError as error:
         print(f"error: {error}", file=sys.stderr)
-        raise SystemExit(1)
+        sys.exit(1)
