@@ -88,9 +88,9 @@ This template enforces:
 ### Copilot Instructions Sync
 - Weekly GitHub Actions automation checks repositories owned by this account for `copilot-instructions.md`.
 - When a repository has different instructions, the workflow opens or updates a GitHub issue with:
-	- the source repository and file path
-	- a unified diff against `.github/copilot-instructions.md`
-	- a copy-ready command block to merge that source file into this repository and open a pull request
+  - the source repository and file path
+  - a unified diff against `.github/copilot-instructions.md`
+  - a copy-ready command block to merge that source file into this repository and open a pull request
 - The workflow runs every Monday at 09:00 UTC and can also be started manually from GitHub Actions.
 
 ## Quick Start In A New Project

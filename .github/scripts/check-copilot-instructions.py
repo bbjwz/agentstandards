@@ -150,10 +150,13 @@ def merge_command(repository: str, source_path: str, baseline_path: str) -> str:
         f"""\
         SOURCE_REPO={repository}
         SOURCE_PATH={source_path}
+        BRANCH="sync-copilot-instructions-${{SOURCE_REPO##*/}}"
+        git checkout -b "${{BRANCH}}"
         gh api "repos/${{SOURCE_REPO}}/contents/${{SOURCE_PATH}}" --jq .content | base64 --decode > {baseline_path}
-        git checkout -b sync-copilot-instructions-${{SOURCE_REPO##*/}}
         git add {baseline_path}
         git commit -m "Sync Copilot instructions from ${{SOURCE_REPO}}"
+        git push --set-upstream origin "${{BRANCH}}"
+        gh pr create --title "Sync Copilot instructions from ${{SOURCE_REPO}}" --body "Updates {baseline_path} from ${{SOURCE_REPO}}/${{SOURCE_PATH}}."
         """
     ).strip()
 
