@@ -23,8 +23,8 @@ import urllib.request
 
 GITHUB_API_BASE_URL = "https://api.github.com"
 ISSUE_TITLE = "Weekly Copilot instructions changes detected"
-# GitHub issue bodies are capped at 65,536 characters; stay below that limit
-# to leave room for formatting and truncation notes.
+# Keep reports conservative so large diffs remain readable and leave room for
+# formatting and truncation notes below GitHub's issue body limit.
 MAX_ISSUE_BODY = 60_000
 MAX_DIFF_CHARS = 12_000
 MAX_SEARCH_PAGES = 10
@@ -159,14 +159,14 @@ def merge_command(repository: str, source_path: str, baseline_path: str) -> str:
     quoted_baseline_path = shlex.quote(baseline_path)
     return textwrap.dedent(
         f"""\
-        SOURCE_REPO={quoted_repository}
-        SOURCE_PATH={quoted_source_path}
-        BASELINE_PATH={quoted_baseline_path}
-        BRANCH="sync-copilot-instructions-${{SOURCE_REPO##*/}}"
         if [ -n "$(git status --porcelain)" ]; then
           echo "Working directory is not clean. Commit, stash, or discard changes first."
           exit 1
         fi
+        SOURCE_REPO={quoted_repository}
+        SOURCE_PATH={quoted_source_path}
+        BASELINE_PATH={quoted_baseline_path}
+        BRANCH="sync-copilot-instructions-${{SOURCE_REPO##*/}}"
         git checkout -b "${{BRANCH}}"
         gh api "repos/${{SOURCE_REPO}}/contents/${{SOURCE_PATH}}" --jq .content | base64 --decode > "${{BASELINE_PATH}}"
         git add "${{BASELINE_PATH}}"
