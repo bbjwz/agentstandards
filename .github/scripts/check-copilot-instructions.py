@@ -24,6 +24,7 @@ API_ROOT = "https://api.github.com"
 ISSUE_TITLE = "Weekly Copilot instructions changes detected"
 MAX_ISSUE_BODY = 60_000
 MAX_DIFF_CHARS = 12_000
+MAX_SEARCH_PAGES = 10
 
 
 class GitHubApiError(RuntimeError):
@@ -87,7 +88,7 @@ def search_instruction_files(owner: str, token: str) -> list[dict[str, str]]:
     encoded_query = urllib.parse.quote(query)
     files: list[dict[str, str]] = []
 
-    for page in range(1, 11):
+    for page in range(1, MAX_SEARCH_PAGES + 1):
         result = request_json(
             "GET",
             f"/search/code?q={encoded_query}&per_page=100&page={page}",
@@ -181,6 +182,8 @@ def build_issue_body(
         body_parts.extend(
             [
                 f"## {change['repository']} `{change['path']}`",
+                "",
+                "Prerequisites: `gh` CLI installed and authenticated, and a clean git working directory.",
                 "",
                 "Merge command:",
                 "",
