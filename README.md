@@ -85,6 +85,14 @@ This template enforces:
 - `docs/adr-template.md`
 - `docs/skills-catalog.md`
 
+### Copilot Instructions Sync
+- Weekly GitHub Actions automation checks repositories owned by this account for `copilot-instructions.md`.
+- When a repository has different instructions, the workflow opens or updates a GitHub issue with:
+	- the source repository and file path
+	- a unified diff against `.github/copilot-instructions.md`
+	- a copy-ready command block to merge that source file into this repository and open a pull request
+- The workflow runs every Monday at 09:00 UTC and can also be started manually from GitHub Actions.
+
 ## Quick Start In A New Project
 
 1. Copy this template structure into the new repository.
@@ -122,3 +130,9 @@ Pipeline progression stops when any of the following occur:
 - Skills are portable and can be reused across projects by copying `.github/skills/`.
 - Context7 MCP integration is intentionally deferred to a follow-up increment.
 - Each generated use case must map to a test plan and to the process flow represented by sequence definitions.
+
+## What Was Added
+
+- Added a weekly Copilot instructions sync check under `.github/workflows/copilot-instructions-sync.yml`.
+- Added `.github/scripts/check-copilot-instructions.py` to compare discovered `copilot-instructions.md` files and report merge-ready diffs.
+- For private or cross-repository checks, add a `COPILOT_SYNC_TOKEN` repository secret with read access to the repositories that should be scanned.

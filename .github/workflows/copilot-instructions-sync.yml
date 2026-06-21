@@ -1,0 +1,27 @@
+name: Copilot instructions sync check
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-copilot-instructions:
+    name: Compare Copilot instructions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check repositories for Copilot instruction changes
+        env:
+          BASELINE_PATH: .github/copilot-instructions.md
+          COPILOT_SYNC_TOKEN: ${{ secrets.COPILOT_SYNC_TOKEN }}
+          CURRENT_REPOSITORY: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+        run: python .github/scripts/check-copilot-instructions.py
