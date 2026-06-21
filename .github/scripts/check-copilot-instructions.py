@@ -23,6 +23,8 @@ import urllib.request
 
 GITHUB_API_BASE_URL = "https://api.github.com"
 ISSUE_TITLE = "Weekly Copilot instructions changes detected"
+# GitHub issue bodies are capped at 65,536 characters; stay below that limit
+# to leave room for formatting and truncation notes.
 MAX_ISSUE_BODY = 60_000
 MAX_DIFF_CHARS = 12_000
 MAX_SEARCH_PAGES = 10
@@ -39,6 +41,11 @@ def env_required(name: str) -> str:
     return value
 
 
+def user_agent() -> str:
+    repository = os.environ.get("CURRENT_REPOSITORY", "copilot-instructions-sync")
+    return repository.replace("/", "-") + "-copilot-instructions-sync"
+
+
 def request_json(
     method: str,
     path: str,
@@ -51,7 +58,7 @@ def request_json(
     headers = {
         "Accept": accept,
         "Authorization": "Bearer " + token,
-        "User-Agent": "agentstandards-copilot-instructions-sync",
+        "User-Agent": user_agent(),
         "X-GitHub-Api-Version": "2022-11-28",
     }
     if body is not None:
