@@ -13,6 +13,7 @@ import difflib
 import json
 import os
 import pathlib
+import shlex
 import sys
 import textwrap
 import urllib.error
@@ -20,7 +21,7 @@ import urllib.parse
 import urllib.request
 
 
-API_ROOT = "https://api.github.com"
+GITHUB_API_BASE_URL = "https://api.github.com"
 ISSUE_TITLE = "Weekly Copilot instructions changes detected"
 MAX_ISSUE_BODY = 60_000
 MAX_DIFF_CHARS = 12_000
@@ -58,7 +59,7 @@ def request_json(
         headers["Content-Type"] = "application/json"
 
     request = urllib.request.Request(
-        f"{API_ROOT}{path}",
+        f"{GITHUB_API_BASE_URL}{path}",
         data=data,
         headers=headers,
         method=method,
@@ -146,17 +147,25 @@ def unified_diff(
 
 
 def merge_command(repository: str, source_path: str, baseline_path: str) -> str:
+    quoted_repository = shlex.quote(repository)
+    quoted_source_path = shlex.quote(source_path)
+    quoted_baseline_path = shlex.quote(baseline_path)
     return textwrap.dedent(
         f"""\
-        SOURCE_REPO={repository}
-        SOURCE_PATH={source_path}
+        SOURCE_REPO={quoted_repository}
+        SOURCE_PATH={quoted_source_path}
+        BASELINE_PATH={quoted_baseline_path}
         BRANCH="sync-copilot-instructions-${{SOURCE_REPO##*/}}"
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "Working directory is not clean. Commit, stash, or discard changes first."
+          exit 1
+        fi
         git checkout -b "${{BRANCH}}"
-        gh api "repos/${{SOURCE_REPO}}/contents/${{SOURCE_PATH}}" --jq .content | base64 --decode > {baseline_path}
-        git add {baseline_path}
+        gh api "repos/${{SOURCE_REPO}}/contents/${{SOURCE_PATH}}" --jq .content | base64 --decode > "${{BASELINE_PATH}}"
+        git add "${{BASELINE_PATH}}"
         git commit -m "Sync Copilot instructions from ${{SOURCE_REPO}}"
         git push --set-upstream origin "${{BRANCH}}"
-        gh pr create --title "Sync Copilot instructions from ${{SOURCE_REPO}}" --body "Updates {baseline_path} from ${{SOURCE_REPO}}/${{SOURCE_PATH}}."
+        gh pr create --title "Sync Copilot instructions from ${{SOURCE_REPO}}" --body "Updates ${{BASELINE_PATH}} from ${{SOURCE_REPO}}/${{SOURCE_PATH}}."
         """
     ).strip()
 
