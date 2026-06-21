@@ -11,6 +11,8 @@ These instructions apply to the full repository.
 - Aim for NASA 10 rules coding standards
 - For architecture pipeline work, enforce deterministic phases and strict fail gates defined in .github/agents/AGENTS.md.
 - Do not bypass schema contracts in templates/artifacts when generating phase outputs.
+- Deliver shippable code.
+- Never create MVP's unless explicitly asked to. 
 
 ## Coding Standards
 - Keep changes minimal and targeted; avoid unrelated refactors.
