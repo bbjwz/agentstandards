@@ -20,6 +20,9 @@ These instructions apply to the full repository.
 ## Coding Standards TypeScript
 - Maintain strict TypeScript compatibility; do not silence type errors with ts-ignore.
 
+## Coding Standards TypeScript
+- Always refer to Apples latest documentation to ensure we use the latest and greatest. 
+
 ## UI and UX Expectations
 - Prioritize clear states: loading, empty, error, and success.
 
