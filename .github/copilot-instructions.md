@@ -46,7 +46,9 @@ These instructions apply to the full repository.
 - Use environment variables and platform secret stores (GitHub Secrets, Azure app settings).
 
 ## Documentation
+- Before changing anything always write your plan in an ai-logs.md file.
 - When adding or changing anything, update README to reflect the current state of the project.
+- when adding or changing anything, update the ai-plan.md file and log which part of the plan was completed and which not
 - When adding functionality, append README with a concise "what was added" summary.
 
 ## Pipeline Template Guardrails
