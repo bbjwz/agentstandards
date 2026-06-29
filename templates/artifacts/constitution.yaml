@@ -1,0 +1,41 @@
+schema_version: 1.0.0
+generated_at: "2026-01-01T00:00:00Z"
+source_phase: bootstrap
+scope:
+  project_name: ""
+  reviewed_at: "2026-01-01"
+  owner: ""
+technology_constraints:
+  mandated:
+    - ""
+  prohibited:
+    - ""
+engineering_principles:
+  - principle_id: PRIN-001
+    statement: ""
+    rationale: ""
+quality_standards:
+  min_test_coverage_pct: 80
+  required_test_dimensions:
+    - unit
+    - integration
+    - contract
+    - e2e
+  performance_budget:
+    - metric: ""
+      threshold: ""
+  security_posture: ""
+compliance_constraints:
+  - constraint_id: COMP-001
+    framework: ""
+    requirement: ""
+architecture_boundaries:
+  - boundary_id: BOUND-001
+    description: ""
+governance_policy:
+  adr_required: true
+  rejected_alternatives_documented: true
+  unresolved_tradeoffs_explicit: true
+production_feedback:
+  incident_spec_amendment_process: ""
+  convergence_review_cadence: ""

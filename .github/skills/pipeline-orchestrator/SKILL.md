@@ -18,18 +18,20 @@ Use this skill to execute the complete pipeline with bounded rounds and strict f
 
 ## Execution Order
 1. /phase-ingest-spec
-2. /phase-parallel-planning
-3. /phase-critique-round-1
-4. /phase-plan-revision
-5. /phase-cross-critique
-6. /phase-second-critique
-7. /phase-consensus-synthesis
-8. /phase-architecture-validation
-9. /phase-use-case-generation
-10. /phase-sequence-generation
-11. /phase-test-generation
-12. /phase-coverage-validation
-13. /phase-documentation-pack
+2. /phase-clarify (optional — only if spec.yaml contains open_questions)
+3. /phase-parallel-planning
+4. /phase-critique-round-1
+5. /phase-plan-revision
+6. /phase-cross-critique
+7. /phase-second-critique
+8. /phase-consensus-synthesis
+9. /phase-architecture-validation
+10. /phase-use-case-generation
+11. /phase-sequence-generation
+12. /phase-test-generation
+13. /phase-coverage-validation
+14. /phase-documentation-pack
+15. /phase-converge
 
 ## Hard Requirements
 - Stop immediately on any gate failure.

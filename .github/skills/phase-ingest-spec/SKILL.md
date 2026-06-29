@@ -9,7 +9,8 @@ disable-model-invocation: true
 # Phase Ingest Spec Skill
 
 ## Inputs
-- Source document such as spec/raw-spec.md
+- Source document such as spec/raw-spec.md (required)
+- spec/constitution.md (optional — used to validate constraints during normalization)
 
 ## Output
 - [spec template](../../../templates/artifacts/spec.yaml)
@@ -18,7 +19,8 @@ disable-model-invocation: true
 1. Follow [phase prompt](../../prompts/phase-00-ingest-spec.prompt.md).
 2. Extract requirements and assign REQ identifiers.
 3. Capture constraints, non-goals, and acceptance criteria.
-4. Record open questions explicitly.
+4. If spec/constitution.md exists, apply constitution constraints.
+5. Record open questions explicitly.
 
 ## Gate
 Fail if critical requirements are missing IDs or acceptance criteria.

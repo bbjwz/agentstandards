@@ -11,24 +11,28 @@ This file is the source of truth for phase ordering, role boundaries, and gate b
 - Loop policy: No unbounded debates. Maximum two critique loops.
 - Stop policy: Hard-fail on missing required artifacts, schema violations, or unresolved blocking decisions.
 - Format policy: YAML-first intermediate artifacts, markdown for final human-readable packs.
+- Bootstrap prerequisite: spec/constitution.md should be created before first pipeline run using templates/spec/constitution.md. It is consumed by phase_00 and phase_00b.
 
 ## Canonical Phase Order
 1. phase_00_spec_ingestion
-2. phase_01_parallel_planning
-3. phase_02_critique_round_1
-4. phase_03_plan_revision
-5. phase_04_cross_critique_round
-6. phase_05_second_critique
-7. phase_06_consensus_synthesis
-8. phase_07_architecture_validation
-9. phase_08_use_case_generation
-10. phase_09_sequence_generation
-11. phase_10_test_scenario_generation
-12. phase_11_coverage_validation
-13. phase_12_documentation_pack
+2. phase_00b_clarify (OPTIONAL — run when spec.yaml contains open_questions)
+3. phase_01_parallel_planning
+4. phase_02_critique_round_1
+5. phase_03_plan_revision
+6. phase_04_cross_critique_round
+7. phase_05_second_critique
+8. phase_06_consensus_synthesis
+9. phase_07_architecture_validation
+10. phase_08_use_case_generation
+11. phase_09_sequence_generation
+12. phase_10_test_scenario_generation
+13. phase_11_coverage_validation
+14. phase_12_documentation_pack
+15. phase_13_converge
 
 ## Skill Command Mapping
 - /phase-ingest-spec -> phase_00_spec_ingestion
+- /phase-clarify -> phase_00b_clarify (optional)
 - /phase-parallel-planning -> phase_01_parallel_planning
 - /phase-critique-round-1 -> phase_02_critique_round_1
 - /phase-plan-revision -> phase_03_plan_revision
@@ -41,6 +45,7 @@ This file is the source of truth for phase ordering, role boundaries, and gate b
 - /phase-test-generation -> phase_10_test_scenario_generation
 - /phase-coverage-validation -> phase_11_coverage_validation
 - /phase-documentation-pack -> phase_12_documentation_pack
+- /phase-converge -> phase_13_converge
 - /pipeline-orchestrator -> executes the full ordered mapping above
 
 ## Phase Contracts
@@ -48,10 +53,25 @@ This file is the source of truth for phase ordering, role boundaries, and gate b
 ### phase_00_spec_ingestion
 - Required input:
   - spec/raw-spec.md
+- Optional input:
+  - spec/constitution.md (if present, apply its constraints during normalization)
 - Required output:
   - artifacts/spec.yaml
 - Gate:
   - Must include requirement IDs, constraints, non-goals, and acceptance criteria.
+
+### phase_00b_clarify (OPTIONAL)
+- Trigger condition:
+  - artifacts/spec.yaml contains one or more open_questions entries
+- Required input:
+  - artifacts/spec.yaml
+- Optional input:
+  - spec/constitution.md
+- Required output:
+  - artifacts/clarification-log.yaml
+- Gate:
+  - All critical open questions must be resolved or deferred with documented reason.
+  - clarify_gate.ready_for_planning must be true before proceeding to phase_01.
 
 ### phase_01_parallel_planning
 - Required input:
@@ -173,6 +193,21 @@ This file is the source of truth for phase ordering, role boundaries, and gate b
   - docs/final-documentation-pack.md
 - Gate:
   - Must include version stamp and linked artifact index.
+
+### phase_13_converge
+- Required input:
+  - artifacts/spec.yaml
+  - artifacts/validation/traceability-matrix.yaml
+  - artifacts/tests/test-matrix.yaml
+  - docs/final-documentation-pack.md
+- Optional input:
+  - spec/constitution.md
+- Required output:
+  - artifacts/validation/convergence-report.yaml
+- Gate:
+  - All requirements must be accounted for (fully_implemented, partially_implemented, or not_implemented with documented blocker).
+  - Critical requirements with not_implemented status and no blocker are a hard fail.
+  - If converge_gate.pipeline_rerun_required is true, record the spec amendment path and halt.
 
 ## Role Registry
 

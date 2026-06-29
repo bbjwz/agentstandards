@@ -2,6 +2,12 @@
 
 This runbook defines how to execute the deterministic multi-agent pipeline in every new project.
 
+## 0. Bootstrap: Create Project Constitution (Recommended)
+Before the first pipeline run, establish governing principles for the project.
+1. Copy `templates/spec/constitution.md` to `spec/constitution.md` in the project.
+2. Fill in technology constraints, engineering principles, quality standards, and compliance requirements.
+3. The constitution is consumed by phase_00 (spec ingestion) and phase_00b (clarify) to anchor decisions.
+
 ## 1. Bootstrap
 1. Copy this repository structure into the new project.
 2. Create folders in the new project:
@@ -21,18 +27,20 @@ This runbook defines how to execute the deterministic multi-agent pipeline in ev
 ## 2. Execute Phases
 Use skills as slash commands in strict order:
 1. /phase-ingest-spec
-2. /phase-parallel-planning
-3. /phase-critique-round-1
-4. /phase-plan-revision
-5. /phase-cross-critique
-6. /phase-second-critique
-7. /phase-consensus-synthesis
-8. /phase-architecture-validation
-9. /phase-use-case-generation
-10. /phase-sequence-generation
-11. /phase-test-generation
-12. /phase-coverage-validation
-13. /phase-documentation-pack
+2. /phase-clarify  *(optional — run only if spec.yaml has open_questions entries)*
+3. /phase-parallel-planning
+4. /phase-critique-round-1
+5. /phase-plan-revision
+6. /phase-cross-critique
+7. /phase-second-critique
+8. /phase-consensus-synthesis
+9. /phase-architecture-validation
+10. /phase-use-case-generation
+11. /phase-sequence-generation
+12. /phase-test-generation
+13. /phase-coverage-validation
+14. /phase-documentation-pack
+15. /phase-converge
 
 Alternative:
 - Run /pipeline-orchestrator to execute the same order with guided control.
@@ -45,6 +53,8 @@ Prompt compatibility:
 - Artifact schema mismatch against templates/artifacts.
 - Blocking unresolved ADRs during architecture validation.
 - Requirement traceability gaps during coverage validation.
+- Unresolved critical open questions during clarify gate (phase_00b).
+- Critical requirement classified as not_implemented without a documented blocker during converge gate (phase_13).
 
 ## 4. Required Test Dimensions
 - unit
@@ -66,3 +76,10 @@ Coverage must always be complete:
 - Keep all rejected alternatives documented.
 - Keep unresolved tradeoffs explicit and owned.
 - Do not bypass gates unless a documented exception policy exists.
+
+## 7. Production Feedback Loop
+When the pipeline terminates and the system is in production:
+1. Incidents and recurring error patterns are documented as amendments in spec/raw-spec.md.
+2. The convergence report (artifacts/validation/convergence-report.yaml) is reviewed each sprint.
+3. If converge_gate.pipeline_rerun_required is true, rerun from /phase-ingest-spec with the convergence report attached as supplementary context.
+4. New requirements discovered via production feedback are assigned new REQ-* IDs and processed through the full phase chain.
