@@ -1,0 +1,27 @@
+schema_version: 1.0.0
+generated_at: "2026-01-01T00:00:00Z"
+source_phase: phase_00b_clarify
+spec_ref: artifacts/spec.yaml
+open_questions_resolved:
+  - question_id: Q-001
+    original_text: ""
+    resolution: ""
+    resolution_type: answered
+    impacts:
+      - requirement_id: REQ-001
+        change: ""
+open_questions_deferred:
+  - question_id: Q-002
+    original_text: ""
+    deferral_reason: ""
+    review_trigger: ""
+spec_amendments:
+  - amendment_id: AMD-001
+    requirement_id: REQ-001
+    original_text: ""
+    amended_text: ""
+    reason: ""
+clarify_gate:
+  all_critical_resolved: true
+  unresolved_blocking_count: 0
+  ready_for_planning: true
