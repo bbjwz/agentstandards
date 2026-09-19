@@ -1,5 +1,9 @@
 # Long-Read System Documentation
 
+> **Deprecated migration reference.** This document describes the former Copilot-oriented entrypoint.
+> The Spec Kit extension and `runtime/agentstandards/personas.yml` are now authoritative; see
+> `README.md` and `docs/multi-vendor-council.md`.
+
 ## Executive summary
 This repository implements a deterministic, skills-first multi-agent architecture pipeline template for GitHub Copilot and VS Code. It is designed to drive architecture planning, critique, convergence, validation, and artifact generation through strict phase gates and schema-bound outputs. Evidence: README.md:3, README.md:5, README.md:46, README.md:66, .github/agents/AGENTS.md:15, .github/agents/AGENTS.md:46
 

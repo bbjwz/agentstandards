@@ -1,0 +1,52 @@
+name: Live architecture council
+
+on:
+  workflow_dispatch:
+    inputs:
+      feature_directory:
+        description: "Repository-relative Spec Kit feature directory"
+        required: true
+        type: string
+      codex_model:
+        description: "Exact Codex model ID"
+        required: true
+        type: string
+      anthropic_model:
+        description: "Exact Anthropic model ID"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  council:
+    runs-on: ubuntu-latest
+    environment: live-architecture-council
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      SPECIFY_FEATURE_DIRECTORY: ${{ inputs.feature_directory }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Codex CLI
+        run: npm install --global @openai/codex
+      - name: Verify explicit manual credentials
+        run: test -n "$OPENAI_API_KEY" && test -n "$ANTHROPIC_API_KEY"
+      - name: Configure pinned required participants
+        run: >-
+          uv run --script scripts/python/agentstandards.py init
+          --codex-model "${{ inputs.codex_model }}"
+          --anthropic-model "${{ inputs.anthropic_model }}"
+      - name: Run through the human decision gate
+        run: uv run --script scripts/python/agentstandards.py architect --json
+      - name: Upload architecture evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-council-${{ github.run_id }}
+          path: ${{ inputs.feature_directory }}/architecture
+          if-no-files-found: error

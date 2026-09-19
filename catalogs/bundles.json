@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "updated_at": "2026-09-19T00:00:00Z",
+  "catalog_url": "https://raw.githubusercontent.com/bbjwz/agentstandards/v0.1.0/catalogs/bundles.json",
+  "bundles": {
+    "agentstandards": {
+      "name": "Agentstandards Multi-Vendor Architecture",
+      "id": "agentstandards",
+      "version": "0.1.0",
+      "role": "architecture-governance",
+      "description": "Installs the council extension, hard task gate, and Codex architecture workflow.",
+      "author": "bbjwz",
+      "license": "MIT",
+      "download_url": "https://github.com/bbjwz/agentstandards/releases/download/v0.1.0/agentstandards-bundle-0.1.0.zip",
+      "repository": "https://github.com/bbjwz/agentstandards",
+      "requires": {"speckit_version": ">=1.0.8,<2.0.0"},
+      "provides": {"extensions": 1, "presets": 1, "steps": 0, "workflows": 1},
+      "tags": ["architecture", "governance", "multi-vendor", "codex"]
+    }
+  }
+}

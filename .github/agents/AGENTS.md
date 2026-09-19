@@ -1,10 +1,14 @@
 ---
-description: Deterministic multi-agent orchestration registry for planning, critique, convergence, validation, and artifact generation.
+description: Deprecated Copilot-era orchestration registry retained as a migration reference.
 ---
 
 # Deterministic Pipeline Registry
 
-This file is the source of truth for phase ordering, role boundaries, and gate behavior.
+> **Deprecated:** This is a migration reference, not an executable or authoritative entrypoint.
+> Use the Spec Kit Agentstandards commands. `runtime/agentstandards/personas.yml` is the canonical
+> persona registry and the persisted architecture gate controls task progression.
+
+This file records the former Copilot phase ordering, role boundaries, and gate behavior.
 
 ## Operating Model
 - Objective: Structured adversarial review with deterministic convergence.
