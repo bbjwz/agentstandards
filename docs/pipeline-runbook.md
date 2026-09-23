@@ -66,3 +66,5 @@ Missing, invalid, awaiting, or blocked reports stop task generation before `task
 - Re-running a partial phase reuses artifacts only when the full visible input hash matches.
 - Changed Spec Kit inputs or participant configuration require a new run.
 - Never edit provider artifacts or transcripts. Human authority belongs in the decision manifest.
+- Treat visible transcripts as potentially confidential project material and review the complete
+  architecture directory before committing or sharing it.
