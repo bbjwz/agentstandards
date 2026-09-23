@@ -1,14 +1,18 @@
 ---
 name: pipeline-orchestrator
-description: Run the full deterministic multi-agent architecture pipeline from spec ingestion to documentation pack. Use when starting or reviewing a project with strict phase gates.
+description: Deprecated Copilot-era pipeline retained only as a migration reference; use the Spec Kit Agentstandards skills instead.
 argument-hint: path to spec and optional scope notes
-user-invocable: true
+user-invocable: false
 disable-model-invocation: true
 ---
 
 # Pipeline Orchestrator Skill
 
-Use this skill to execute the complete pipeline with bounded rounds and strict fail gates.
+> **Deprecated:** Do not use this as the runtime entrypoint. Install the Spec Kit bundle and invoke
+> `$speckit-agentstandards-architect`. The canonical persona registry is
+> `runtime/agentstandards/personas.yml`.
+
+This skill documents the former bounded Copilot pipeline.
 
 ## Required References
 - Phase registry: [AGENTS](../../agents/AGENTS.md)

@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  offline-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install test dependencies
+        run: uv sync --extra test
+      - name: Lint
+        run: uv run --extra test ruff check .
+      - name: Test without provider calls
+        run: uv run --extra test pytest --cov=agentstandards --cov-report=term-missing
+      - name: Build release archives
+        run: uv run python scripts/build_release.py --output dist/spec-kit
+      - name: Install into a clean Spec Kit Codex project
+        run: bash scripts/verify_spec_kit_install.sh
+      - name: Reject credentials and private keys
+        run: |
+          if rg -n --hidden --glob '!.git/**' --glob '!tests/**' --glob '!uv.lock' '(-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----|\b(AKIA|ASIA)[A-Z0-9]{16}\b|\b(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{30,}\b|\bsk-ant-[A-Za-z0-9_-]{20,}\b)' .; then
+            echo 'Potential credential detected.' >&2
+            exit 1
+          fi

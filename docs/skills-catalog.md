@@ -1,5 +1,9 @@
 # Skills Catalog
 
+> **Deprecated migration reference.** These Copilot-era skills are not the supported runtime.
+> Use the Spec Kit skills documented in `README.md`; `runtime/agentstandards/personas.yml` is the
+> authoritative persona registry.
+
 This catalog maps each skill to its pipeline phase and artifact contracts.
 
 ## Orchestration

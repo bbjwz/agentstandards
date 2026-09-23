@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "updated_at": "2026-09-19T00:00:00Z",
+  "catalog_url": "https://raw.githubusercontent.com/bbjwz/agentstandards/v0.1.0/catalogs/workflows.json",
+  "workflows": {
+    "agentstandards-architecture": {
+      "id": "agentstandards-architecture",
+      "name": "Spec Kit Multi-Vendor Architecture Council",
+      "description": "Runs specify, clarify, plan, the architecture council, human decisions, validation, and gated task generation.",
+      "author": "bbjwz",
+      "version": "0.1.0",
+      "url": "https://raw.githubusercontent.com/bbjwz/agentstandards/v0.1.0/workflows/agentstandards-architecture/workflow.yml",
+      "repository": "https://github.com/bbjwz/agentstandards",
+      "license": "MIT",
+      "requires": {"speckit_version": ">=1.0.8,<2.0.0"},
+      "tags": ["architecture", "multi-vendor", "human-gate", "codex"]
+    }
+  }
+}
