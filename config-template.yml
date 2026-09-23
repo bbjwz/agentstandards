@@ -60,3 +60,10 @@ transcripts:
   include_response_envelope: false
   secret_scan: true
   redaction_policy: "abort"
+
+# Mandatory and intentionally non-configurable: every inference attempt uses a
+# newly constructed adapter and a fresh provider conversation/request.
+isolation:
+  context_mode: "fresh-context-per-invocation"
+  reuse_provider_sessions: false
+  reuse_adapter_instances: false

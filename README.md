@@ -34,6 +34,14 @@ and an architecture validator. Every persona uses an independent pass followed b
 Disclosed artifacts name the participant, underlying vendor, exact model, persona, and artifact ID so
 reviewers know whose work they are challenging.
 
+Every inference attempt is context-isolated. The runner constructs a new single-use provider adapter,
+starts a new stateless API request or ephemeral Codex process, and supplies only the visible context
+for that pass. Independent and disclosed validator passes therefore cannot inherit conversation
+state from planning, critique, synthesis, compilation, or one another. Transcripts and the aggregate
+gate report carry distinct invocation IDs, and offline validation rejects reused or missing isolation
+evidence. This guarantees a fresh conversation context; hosted APIs cannot guarantee a physically
+different model server or set of weights.
+
 ## Requirements
 
 - Python 3.11 or newer
@@ -126,7 +134,8 @@ architecture/
 ```
 
 Transcripts contain visible prompts and outputs, timestamps, exact requested and resolved models,
-usage, estimated cost, latency, request IDs, and content hashes. They exclude API keys, headers,
+usage, estimated cost, latency, request IDs, content hashes, and fresh-context isolation evidence.
+They exclude API keys, headers,
 hidden reasoning, and provider-internal state. High-confidence secret detection aborts before sending
 or persisting content.
 

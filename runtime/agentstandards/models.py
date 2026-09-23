@@ -100,6 +100,16 @@ class VisibleExchange(StrictModel):
         return self
 
 
+class IsolationEvidence(StrictModel):
+    """Auditable proof that one inference started without conversation history."""
+
+    invocation_id: str = Field(min_length=1)
+    adapter_instance_id: str = Field(min_length=1)
+    context_mode: Literal["fresh"] = "fresh"
+    prior_conversation_messages: Literal[0] = 0
+    provider_session_reused: Literal[False] = False
+
+
 class CallAttemptTranscript(StrictModel):
     attempt_id: str
     run_id: str
@@ -120,6 +130,7 @@ class CallAttemptTranscript(StrictModel):
     visible_system_prompt: str
     visible_user_prompt: str
     input_hash: str
+    isolation: IsolationEvidence
     exchanges: list[VisibleExchange] = Field(default_factory=list)
 
 
@@ -143,6 +154,7 @@ class Transcript(StrictModel):
     visible_output: str
     input_hash: str
     output_hash: str
+    isolation: IsolationEvidence
     usage: Usage = Field(default_factory=Usage)
     exchanges: list[VisibleExchange] = Field(default_factory=list)
 
@@ -161,6 +173,7 @@ class ArtifactEnvelope(StrictModel):
     resolved_model: str
     generated_at: datetime = Field(default_factory=utc_now)
     input_hash: str
+    isolation: IsolationEvidence
     transcript_path: str
     payload: PersonaPayload
 
@@ -286,6 +299,18 @@ class DecisionManifest(StrictModel):
         return self
 
 
+class GateIsolationRecord(StrictModel):
+    participant_id: str = Field(min_length=1)
+    independent_invocation_id: str = Field(min_length=1)
+    disclosed_invocation_id: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def require_distinct_invocations(self) -> GateIsolationRecord:
+        if self.independent_invocation_id == self.disclosed_invocation_id:
+            raise ValueError("validator passes must use distinct fresh-context invocations")
+        return self
+
+
 class GateReport(StrictModel):
     schema_version: str = "1.0"
     run_id: str
@@ -297,6 +322,7 @@ class GateReport(StrictModel):
     blocked_participants: list[str] = Field(default_factory=list)
     optional_warnings: list[str] = Field(default_factory=list)
     validator_artifact_ids: list[str] = Field(default_factory=list)
+    validator_isolation: list[GateIsolationRecord] = Field(default_factory=list)
     exception_applied: bool = False
     decision_manifest_path: str
     master_plan_path: str | None = None

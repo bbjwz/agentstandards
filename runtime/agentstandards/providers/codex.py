@@ -23,6 +23,7 @@ class CodexCliProvider(ProviderAdapter):
         project_root: str,
         reserve_call: Callable[[], Awaitable[None]] | None = None,
     ) -> ProviderResult:
+        self.require_isolated_invocation()
         del project_root, reserve_call
         executable = self.config.executable or "codex"
         combined = f"{system_prompt}\n\n{user_prompt}"

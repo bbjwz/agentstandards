@@ -20,6 +20,7 @@ class OpenAICompatibleProvider(ProviderAdapter):
         project_root: str,
         reserve_call: Callable[[], Awaitable[None]] | None = None,
     ) -> ProviderResult:
+        self.require_isolated_invocation()
         del project_root
         api_key = self.config.require_api_key()
         base_url = (self.config.base_url or "").rstrip("/")

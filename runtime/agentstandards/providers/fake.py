@@ -18,6 +18,7 @@ class FakeProvider(ProviderAdapter):
         project_root: str,
         reserve_call: Callable[[], Awaitable[None]] | None = None,
     ) -> ProviderResult:
+        self.require_isolated_invocation()
         del system_prompt, project_root, reserve_call
         marker = self.config.id
         if issubclass(output_model, PersonaPayload):

@@ -106,6 +106,13 @@ class TranscriptConfig(BaseModel):
     redaction_policy: Literal["abort"] = "abort"
 
 
+class IsolationConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    context_mode: Literal["fresh-context-per-invocation"] = "fresh-context-per-invocation"
+    reuse_provider_sessions: Literal[False] = False
+    reuse_adapter_instances: Literal[False] = False
+
+
 class CouncilConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     schema_version: Literal["1.0"] = "1.0"
@@ -113,6 +120,7 @@ class CouncilConfig(BaseModel):
     participants: list[ParticipantConfig]
     limits: LimitsConfig = Field(default_factory=LimitsConfig)
     transcripts: TranscriptConfig = Field(default_factory=TranscriptConfig)
+    isolation: IsolationConfig = Field(default_factory=IsolationConfig)
 
     @model_validator(mode="after")
     def validate_council(self) -> CouncilConfig:

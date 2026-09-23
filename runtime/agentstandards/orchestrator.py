@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Iterable, Sequence
 from pathlib import Path
+from uuid import uuid4
 
 import yaml
 from pydantic import ValidationError
@@ -17,7 +18,9 @@ from .models import (
     DecisionConflict,
     DecisionManifest,
     DecisionOption,
+    GateIsolationRecord,
     GateReport,
+    IsolationEvidence,
     MasterPlan,
     MasterPlanPayload,
     PersonaDefinition,
@@ -315,7 +318,7 @@ class CouncilRunner:
                 )
             return artifact
 
-        result, started_at, completed_at, exchanges = await self._generate_with_retry(
+        result, started_at, completed_at, exchanges, isolation = await self._generate_with_retry(
             participant=participant,
             system_prompt=SYSTEM_PROMPT,
             user_prompt=user_prompt,
@@ -351,6 +354,7 @@ class CouncilRunner:
             visible_output=result.visible_output,
             input_hash=input_hash,
             output_hash=sha256_text(result.visible_output),
+            isolation=isolation,
             usage=usage,
             exchanges=exchanges,
         )
@@ -366,6 +370,7 @@ class CouncilRunner:
             requested_model=participant.model,
             resolved_model=result.resolved_model,
             input_hash=input_hash,
+            isolation=isolation,
             transcript_path=transcript_path.relative_to(self.context.project_root).as_posix(),
             payload=result.parsed,
         )
@@ -387,14 +392,17 @@ class CouncilRunner:
         persona: str,
         input_hash: str,
     ):
-        provider = build_provider(
-            participant, timeout_seconds=self.config.limits.request_timeout_seconds
-        )
         last_error: Exception | None = None
         first_attempt_number = self._next_attempt_number(stage, pass_kind, persona, participant.id)
         for attempt in range(self.config.limits.max_retries + 1):
             attempt_number = first_attempt_number + attempt
             await self._reserve_call()
+            provider = build_provider(
+                participant, timeout_seconds=self.config.limits.request_timeout_seconds
+            )
+            isolation = provider.begin_isolated_invocation(
+                self._invocation_id(stage, pass_kind, persona, participant.id, attempt_number)
+            )
             started_at = utc_now()
             try:
                 async with self._semaphore:
@@ -418,12 +426,13 @@ class CouncilRunner:
                     system_prompt=system_prompt,
                     user_prompt=user_prompt,
                     input_hash=input_hash,
+                    isolation=isolation,
                     outcome="success",
                     retryable=False,
                     error=None,
                     exchanges=exchanges,
                 )
-                return result, started_at, completed_at, exchanges
+                return result, started_at, completed_at, exchanges, isolation
             except ProviderError as exc:
                 completed_at = utc_now()
                 exchanges = self._error_exchanges(participant, user_prompt, exc)
@@ -438,6 +447,7 @@ class CouncilRunner:
                     system_prompt=system_prompt,
                     user_prompt=user_prompt,
                     input_hash=input_hash,
+                    isolation=isolation,
                     outcome="error",
                     retryable=exc.retryable,
                     error=self._safe_error_text(exc),
@@ -449,6 +459,20 @@ class CouncilRunner:
                     raise
                 await asyncio.sleep(min(2**attempt, 8))
         raise CouncilError(str(last_error or "provider call failed"))
+
+    def _invocation_id(
+        self,
+        stage: str,
+        pass_kind: str,
+        persona: str,
+        participant_id: str,
+        attempt_number: int,
+    ) -> str:
+        assert self.paths
+        return (
+            f"invocation:{self.paths.run_id}:{stage}:{pass_kind}:{persona}:"
+            f"{participant_id}:{attempt_number}:{uuid4().hex}"
+        )
 
     def _next_attempt_number(
         self, stage: str, pass_kind: str, persona: str, participant_id: str
@@ -525,6 +549,7 @@ class CouncilRunner:
         system_prompt: str,
         user_prompt: str,
         input_hash: str,
+        isolation: IsolationEvidence,
         outcome: str,
         retryable: bool,
         error: str | None,
@@ -556,6 +581,7 @@ class CouncilRunner:
             visible_system_prompt=system_prompt,
             visible_user_prompt=user_prompt,
             input_hash=input_hash,
+            isolation=isolation,
             exchanges=exchanges,
         )
         write_json(
@@ -754,7 +780,7 @@ class CouncilRunner:
 
         self.state.phase = "compiling"
         save_state(self.paths, self.state)
-        result, started_at, completed_at, exchanges = await self._generate_with_retry(
+        result, started_at, completed_at, exchanges, isolation = await self._generate_with_retry(
             participant=codex,
             system_prompt=SYSTEM_PROMPT,
             user_prompt=prompt,
@@ -789,6 +815,7 @@ class CouncilRunner:
             visible_output=result.visible_output,
             input_hash=input_hash,
             output_hash=sha256_text(result.visible_output),
+            isolation=isolation,
             usage=usage,
             exchanges=exchanges,
         )
@@ -907,11 +934,33 @@ class CouncilRunner:
                 "human exception does not reference every blocking required-validator artifact"
             )
         status = "READY" if not blocked or exception_applied else "BLOCKED"
+        independent_by_participant = {
+            artifact.participant_id: artifact
+            for artifact in self._load_artifacts("validating", "independent")
+        }
+        missing_isolation = sorted(required_ids - set(independent_by_participant))
+        if missing_isolation:
+            raise CouncilError(
+                "required independent validator isolation evidence missing: "
+                + ", ".join(missing_isolation)
+            )
+        validator_isolation = [
+            GateIsolationRecord(
+                participant_id=participant_id,
+                independent_invocation_id=independent_by_participant[
+                    participant_id
+                ].isolation.invocation_id,
+                disclosed_invocation_id=artifact.isolation.invocation_id,
+            )
+            for participant_id, artifact in sorted(final_by_participant.items())
+            if participant_id in independent_by_participant
+        ]
         report = self._write_gate_report(
             status=status,
             ready=ready,
             blocked=blocked,
             validator_ids=[artifact.artifact_id for artifact in validators],
+            validator_isolation=validator_isolation,
             exception_applied=exception_applied,
         )
         self.state.phase = "ready" if status == "READY" else "blocked"
@@ -924,6 +973,7 @@ class CouncilRunner:
         ready: Iterable[str] = (),
         blocked: Iterable[str] = (),
         validator_ids: Iterable[str] = (),
+        validator_isolation: Iterable[GateIsolationRecord] = (),
         exception_applied: bool = False,
     ) -> GateReport:
         assert self.paths and self.state
@@ -936,6 +986,7 @@ class CouncilRunner:
             blocked_participants=list(blocked),
             optional_warnings=self.state.optional_warnings,
             validator_artifact_ids=list(validator_ids),
+            validator_isolation=list(validator_isolation),
             exception_applied=exception_applied,
             decision_manifest_path=self.paths.decision_manifest.relative_to(
                 self.context.project_root
@@ -1033,12 +1084,17 @@ def validate_run_offline(project_root: Path, feature_dir: Path) -> list[str]:
     except (FileNotFoundError, ValidationError, ValueError) as exc:
         errors.append(f"invalid decision manifest: {exc}")
     artifacts: list[ArtifactEnvelope] = []
+    artifact_invocation_ids: set[str] = set()
     for path in paths.artifacts.rglob("*.yaml") if paths.artifacts.exists() else ():
         try:
             artifact = ArtifactEnvelope.model_validate(read_yaml(path))
             artifacts.append(artifact)
             if artifact.run_id != state.run_id:
                 errors.append(f"artifact has wrong run_id: {path}")
+            invocation_id = artifact.isolation.invocation_id
+            if invocation_id in artifact_invocation_ids:
+                errors.append(f"artifact reuses an inference invocation: {path}")
+            artifact_invocation_ids.add(invocation_id)
             transcript = project_root / artifact.transcript_path
             if not transcript.exists():
                 errors.append(f"artifact transcript is missing: {artifact.transcript_path}")
@@ -1048,8 +1104,34 @@ def validate_run_offline(project_root: Path, feature_dir: Path) -> list[str]:
                 )
                 if transcript_data.input_hash != artifact.input_hash:
                     errors.append(f"artifact/transcript input hash mismatch: {path}")
+                if transcript_data.isolation != artifact.isolation:
+                    errors.append(f"artifact/transcript isolation mismatch: {path}")
         except (ValidationError, ValueError) as exc:
             errors.append(f"invalid artifact {path}: {exc}")
+
+    required_ids = {participant.id for participant in snapshot.required_participants}
+    validator_artifacts = {
+        (artifact.pass_kind, artifact.participant_id): artifact
+        for artifact in artifacts
+        if artifact.stage == "validating" and artifact.persona == "architecture-validator"
+    }
+    if state.phase in {"ready", "blocked"}:
+        for participant_id in sorted(required_ids):
+            independent = validator_artifacts.get(("independent", participant_id))
+            disclosed = validator_artifacts.get(("disclosed", participant_id))
+            if independent is None or disclosed is None:
+                errors.append(
+                    f"required validator fresh-context evidence is incomplete: {participant_id}"
+                )
+            elif independent.isolation.invocation_id == disclosed.isolation.invocation_id:
+                errors.append(
+                    f"validator passes reuse an inference invocation: {participant_id}"
+                )
+
+    attempt_invocation_ids: set[str] = set()
+    adapter_instance_ids: set[str] = set()
+    successful_invocation_ids: set[str] = set()
+    final_transcripts: list[tuple[Path, Transcript]] = []
     for path in paths.transcripts.rglob("*.json") if paths.transcripts.exists() else ():
         try:
             if ".attempt-" in path.name:
@@ -1058,6 +1140,16 @@ def validate_run_offline(project_root: Path, feature_dir: Path) -> list[str]:
                 )
                 if attempt.run_id != state.run_id:
                     errors.append(f"attempt transcript has wrong run_id: {path}")
+                invocation_id = attempt.isolation.invocation_id
+                adapter_instance_id = attempt.isolation.adapter_instance_id
+                if invocation_id in attempt_invocation_ids:
+                    errors.append(f"attempt reuses an inference invocation: {path}")
+                attempt_invocation_ids.add(invocation_id)
+                if adapter_instance_id in adapter_instance_ids:
+                    errors.append(f"attempt reuses a provider adapter instance: {path}")
+                adapter_instance_ids.add(adapter_instance_id)
+                if attempt.outcome == "success":
+                    successful_invocation_ids.add(invocation_id)
                 for exchange in attempt.exchanges:
                     if exchange.input_hash != sha256_text(exchange.visible_user_prompt):
                         errors.append(f"attempt exchange input hash mismatch: {path}")
@@ -1066,6 +1158,7 @@ def validate_run_offline(project_root: Path, feature_dir: Path) -> list[str]:
                 assert_no_secrets(path.read_text(encoding="utf-8"), label=str(path))
                 continue
             transcript = Transcript.model_validate_json(path.read_text(encoding="utf-8"))
+            final_transcripts.append((path, transcript))
             if transcript.run_id != state.run_id:
                 errors.append(f"transcript has wrong run_id: {path}")
             if transcript.input_hash != sha256_text(
@@ -1100,6 +1193,14 @@ def validate_run_offline(project_root: Path, feature_dir: Path) -> list[str]:
             assert_no_secrets(path.read_text(encoding="utf-8"), label=str(path))
         except (ValidationError, ValueError) as exc:
             errors.append(f"invalid transcript {path}: {exc}")
+    final_invocation_ids: set[str] = set()
+    for path, transcript in final_transcripts:
+        invocation_id = transcript.isolation.invocation_id
+        if invocation_id in final_invocation_ids:
+            errors.append(f"final transcript reuses an inference invocation: {path}")
+        final_invocation_ids.add(invocation_id)
+        if invocation_id not in successful_invocation_ids:
+            errors.append(f"final transcript lacks a successful isolated attempt: {path}")
     if paths.master_plan.exists():
         try:
             master = MasterPlan.model_validate(read_yaml(paths.master_plan))
@@ -1123,6 +1224,25 @@ def validate_run_offline(project_root: Path, feature_dir: Path) -> list[str]:
                 not paths.master_plan.exists() or not paths.adr_log.exists()
             ):
                 errors.append("READY gate requires a master plan and ADR log")
+            expected_isolation = {
+                participant_id: (
+                    validator_artifacts[("independent", participant_id)].isolation.invocation_id,
+                    validator_artifacts[("disclosed", participant_id)].isolation.invocation_id,
+                )
+                for participant_id in required_ids
+                if ("independent", participant_id) in validator_artifacts
+                and ("disclosed", participant_id) in validator_artifacts
+            }
+            reported_isolation = {
+                record.participant_id: (
+                    record.independent_invocation_id,
+                    record.disclosed_invocation_id,
+                )
+                for record in report.validator_isolation
+                if record.participant_id in required_ids
+            }
+            if report.status in {"READY", "BLOCKED"} and reported_isolation != expected_isolation:
+                errors.append("gate report validator isolation evidence does not match artifacts")
         except (ValidationError, ValueError) as exc:
             errors.append(f"invalid gate report: {exc}")
     return errors

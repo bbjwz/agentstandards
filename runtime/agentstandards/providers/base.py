@@ -4,11 +4,12 @@ from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any
+from uuid import uuid4
 
 from pydantic import BaseModel
 
 from ..config import ParticipantConfig
-from ..models import Usage, VisibleExchange
+from ..models import IsolationEvidence, Usage, VisibleExchange
 
 
 class ProviderError(RuntimeError):
@@ -42,6 +43,31 @@ class ProviderAdapter(ABC):
     def __init__(self, config: ParticipantConfig, *, timeout_seconds: int):
         self.config = config
         self.timeout_seconds = timeout_seconds
+        self.adapter_instance_id = f"adapter-{uuid4().hex}"
+        self._invocation_claimed = False
+        self._generation_started = False
+
+    def begin_isolated_invocation(self, invocation_id: str) -> IsolationEvidence:
+        """Bind this adapter object to exactly one fresh-context inference attempt."""
+        if self._invocation_claimed:
+            raise ProviderError(
+                "provider adapter instance cannot be reused across inference attempts"
+            )
+        self._invocation_claimed = True
+        return IsolationEvidence(
+            invocation_id=invocation_id,
+            adapter_instance_id=self.adapter_instance_id,
+        )
+
+    def require_isolated_invocation(self) -> None:
+        """Refuse unclaimed or repeated generation on this adapter instance."""
+        if not self._invocation_claimed:
+            raise ProviderError("provider generation requires a claimed fresh-context invocation")
+        if self._generation_started:
+            raise ProviderError(
+                "provider adapter instance cannot generate more than once"
+            )
+        self._generation_started = True
 
     @abstractmethod
     async def generate(

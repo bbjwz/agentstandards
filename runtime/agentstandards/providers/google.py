@@ -20,6 +20,7 @@ class GoogleProvider(ProviderAdapter):
         project_root: str,
         reserve_call: Callable[[], Awaitable[None]] | None = None,
     ) -> ProviderResult:
+        self.require_isolated_invocation()
         del project_root, reserve_call
         api_key = self.config.require_api_key()
         base_url = (

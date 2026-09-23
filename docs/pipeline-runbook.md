@@ -31,7 +31,8 @@ rationale, set `status: approved`, and add `decided_by` plus an ISO-8601 `decide
 
 Run `$speckit-agentstandards-resume`. Codex compiles the selected decisions into the authoritative
 master plan. Every participant then runs the architecture-validator persona in independent and
-disclosed passes.
+disclosed passes. Each pass is a new inference invocation with no inherited conversation history;
+the disclosed pass sees earlier work only through the labeled artifacts included in its prompt.
 
 The gate becomes `READY` only when both required participants—Codex and Anthropic—return `READY`.
 Optional participant failures or blocking verdicts remain visible warnings but do not replace the
@@ -54,7 +55,10 @@ Missing, invalid, awaiting, or blocked reports stop task generation before `task
 
 - `$speckit-agentstandards-status` is read-only and makes no paid calls.
 - Run `uv run --script .specify/extensions/agentstandards/scripts/python/agentstandards.py validate --all`
-  to validate schemas, run IDs, provenance, transcript hashes, and secret scanning offline.
+  to validate schemas, run IDs, provenance, transcript hashes, fresh-context isolation, and secret
+  scanning offline.
+- Audit `validator_isolation` in `gate-report.yaml` to confirm distinct independent and disclosed
+  invocation IDs for each required participant.
 - Re-running a partial phase reuses artifacts only when the full visible input hash matches.
 - Changed Spec Kit inputs or participant configuration require a new run.
 - Never edit provider artifacts or transcripts. Human authority belongs in the decision manifest.

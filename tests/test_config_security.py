@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from agentstandards.config import CouncilConfig, ParticipantConfig
+from agentstandards.config import CouncilConfig, IsolationConfig, ParticipantConfig
 from agentstandards.context import build_context
 from agentstandards.security import SecurityViolation, assert_no_secrets
 from pydantic import ValidationError
@@ -51,6 +51,12 @@ def test_gateway_identity_cannot_masquerade_as_underlying_vendor() -> None:
             api_key_env="ROUTER_API_KEY",
             base_url="https://example.invalid/v1",
         )
+
+
+@pytest.mark.parametrize("field", ["reuse_provider_sessions", "reuse_adapter_instances"])
+def test_context_isolation_cannot_be_disabled(field: str) -> None:
+    with pytest.raises(ValidationError):
+        IsolationConfig.model_validate({field: True})
 
 
 def test_context_excludes_source_tasks_and_diffs(spec_project: Path) -> None:

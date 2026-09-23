@@ -218,9 +218,10 @@ def _status(args: argparse.Namespace, project_root: Path) -> int:
     config = CouncilConfig.model_validate(
         yaml.safe_load((paths.run_dir / "config-snapshot.yaml").read_text(encoding="utf-8"))
     )
-    report_status = None
+    report = None
     if paths.gate_report.exists():
-        report_status = gate_status(project_root, feature_dir).status
+        report = gate_status(project_root, feature_dir)
+    report_status = report.status if report else None
     expected = len(config.enabled_participants) * 26 + 1
     payload = {
         "run_id": state.run_id,
@@ -240,6 +241,12 @@ def _status(args: argparse.Namespace, project_root: Path) -> int:
         "completed_artifacts": len(state.completed_artifact_ids),
         "expected_artifacts_including_compile": expected,
         "provider_calls_including_retries": state.call_count,
+        "isolation": config.isolation.model_dump(mode="json"),
+        "validator_isolation": (
+            [item.model_dump(mode="json") for item in report.validator_isolation]
+            if report
+            else []
+        ),
         "usage": state.usage.model_dump(mode="json"),
         "optional_warnings": state.optional_warnings,
         "errors": state.errors,
@@ -249,6 +256,7 @@ def _status(args: argparse.Namespace, project_root: Path) -> int:
     else:
         print(f"Run: {state.run_id} ({state.phase})")
         print(f"Gate: {report_status or 'not created'}")
+        print("Isolation: fresh context and a new adapter for every inference attempt")
         print(
             f"Artifacts: {len(state.completed_artifact_ids)}/{expected}; "
             f"calls: {state.call_count}; estimated cost: ${state.usage.estimated_cost_usd:.4f}"

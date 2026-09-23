@@ -30,6 +30,25 @@ identity, and requires agreements, contradictions, superior ideas, and self-corr
 Critic independent passes receive the completed planning set because that is their review subject,
 but do not receive peer critic responses. The same rule applies to synthesis and validation.
 
+## Fresh-context isolation
+
+Each council persona or gate attempt gets a newly constructed, single-use provider adapter. Native API
+adapters send exactly one system instruction and one explicit user input without a conversation ID
+or prior message history. Codex starts a new temporary working directory and an `--ephemeral`
+process. Retries construct another adapter instead of reusing the failed one. A schema-repair request,
+when needed by a generic adapter, is also stateless and receives only the visible failed output rather
+than conversation history. The disclosed pass is a new invocation: peer work appears only as labeled,
+quoted artifacts in its visible prompt.
+
+Every attempt, final transcript, and persona artifact records an invocation ID, adapter-instance ID,
+`context_mode: fresh`, zero prior conversation messages, and `provider_session_reused: false`.
+Independent and disclosed architecture-validator invocation IDs are copied into the gate report.
+Offline validation rejects duplicate adapter or invocation IDs, missing successful-attempt evidence,
+artifact/transcript mismatches, and validator passes that reuse an invocation.
+
+This is a request-level isolation guarantee. Hosted model APIs do not expose or guarantee dedicated
+hardware, a different serving replica, or different weights for each request.
+
 ## State and determinism
 
 One feature run snapshots exact participants and input file hashes. Artifact identities and paths are

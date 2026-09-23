@@ -10,6 +10,7 @@ from agentstandards.models import PersonaPayload
 from agentstandards.providers.anthropic import AnthropicProvider
 from agentstandards.providers.base import ProviderError
 from agentstandards.providers.codex import CodexCliProvider
+from agentstandards.providers.fake import FakeProvider
 from agentstandards.providers.google import GoogleProvider
 from agentstandards.providers.openai_compatible import OpenAICompatibleProvider
 
@@ -32,6 +33,54 @@ def _patch_client(monkeypatch: pytest.MonkeyPatch, module_httpx, handler) -> Non
     monkeypatch.setattr(module_httpx, "AsyncClient", client)
 
 
+def _isolated(provider):  # type: ignore[no-untyped-def]
+    provider.begin_isolated_invocation(f"test:{provider.adapter_instance_id}")
+    return provider
+
+
+def test_provider_adapter_is_single_use_for_context_isolation() -> None:
+    config = ParticipantConfig(
+        id="fake",
+        transport="fake",
+        underlying_vendor="test-vendor",
+        model="fake-model",
+    )
+    provider = FakeProvider(config, timeout_seconds=30)
+
+    evidence = provider.begin_isolated_invocation("invocation-1")
+
+    assert evidence.context_mode == "fresh"
+    assert evidence.prior_conversation_messages == 0
+    assert evidence.provider_session_reused is False
+    with pytest.raises(ProviderError, match="cannot be reused"):
+        provider.begin_isolated_invocation("invocation-2")
+
+
+@pytest.mark.asyncio
+async def test_provider_generation_requires_fresh_context_claim() -> None:
+    config = ParticipantConfig(
+        id="fake",
+        transport="fake",
+        underlying_vendor="test-vendor",
+        model="fake-model",
+    )
+    provider = FakeProvider(config, timeout_seconds=30)
+    call = {
+        "system_prompt": "system",
+        "user_prompt": "user",
+        "output_model": PersonaPayload,
+        "project_root": "/tmp",
+    }
+
+    with pytest.raises(ProviderError, match="requires a claimed"):
+        await provider.generate(**call)
+
+    isolated = _isolated(FakeProvider(config, timeout_seconds=30))
+    await isolated.generate(**call)
+    with pytest.raises(ProviderError, match="cannot generate more than once"):
+        await isolated.generate(**call)
+
+
 @pytest.mark.asyncio
 async def test_native_anthropic_adapter_uses_structured_outputs(
     monkeypatch: pytest.MonkeyPatch,
@@ -41,6 +90,7 @@ async def test_native_anthropic_adapter_uses_structured_outputs(
     def handler(request: httpx.Request) -> httpx.Response:
         body = json.loads(request.content)
         assert body["output_config"]["format"]["type"] == "json_schema"
+        assert body["messages"] == [{"role": "user", "content": "user"}]
         assert request.headers["x-api-key"] == "test-key-not-a-real-secret"
         return httpx.Response(
             200,
@@ -65,7 +115,7 @@ async def test_native_anthropic_adapter_uses_structured_outputs(
         model="claude-test",
         api_key_env="ANTHROPIC_API_KEY",
     )
-    result = await AnthropicProvider(config, timeout_seconds=30).generate(
+    result = await _isolated(AnthropicProvider(config, timeout_seconds=30)).generate(
         system_prompt="system",
         user_prompt="user",
         output_model=PersonaPayload,
@@ -85,6 +135,7 @@ async def test_native_google_adapter_uses_response_json_schema(
         body = json.loads(request.content)
         assert body["generationConfig"]["responseMimeType"] == "application/json"
         assert "responseJsonSchema" in body["generationConfig"]
+        assert body["contents"] == [{"role": "user", "parts": [{"text": "user"}]}]
         return httpx.Response(
             200,
             json={
@@ -111,7 +162,7 @@ async def test_native_google_adapter_uses_response_json_schema(
         model="gemini-test",
         api_key_env="GOOGLE_API_KEY",
     )
-    result = await GoogleProvider(config, timeout_seconds=30).generate(
+    result = await _isolated(GoogleProvider(config, timeout_seconds=30)).generate(
         system_prompt="system",
         user_prompt="user",
         output_model=PersonaPayload,
@@ -131,6 +182,8 @@ async def test_openai_compatible_adapter_pins_model_and_schema(
         body = json.loads(request.content)
         assert body["model"] == "explicit-vendor/model-test"
         assert body["response_format"]["json_schema"]["strict"] is True
+        assert [message["role"] for message in body["messages"]] == ["system", "user"]
+        assert body["messages"][1]["content"] == "user"
         return httpx.Response(
             200,
             headers={"x-request-id": "router-request"},
@@ -153,7 +206,7 @@ async def test_openai_compatible_adapter_pins_model_and_schema(
         api_key_env="ROUTER_API_KEY",
         base_url="https://router.example/v1",
     )
-    result = await OpenAICompatibleProvider(config, timeout_seconds=30).generate(
+    result = await _isolated(OpenAICompatibleProvider(config, timeout_seconds=30)).generate(
         system_prompt="system",
         user_prompt="user",
         output_model=PersonaPayload,
@@ -182,7 +235,7 @@ async def test_anthropic_timeout_is_retryable(monkeypatch: pytest.MonkeyPatch) -
         api_key_env="ANTHROPIC_API_KEY",
     )
     with pytest.raises(ProviderError) as captured:
-        await AnthropicProvider(config, timeout_seconds=30).generate(
+        await _isolated(AnthropicProvider(config, timeout_seconds=30)).generate(
             system_prompt="system",
             user_prompt="user",
             output_model=PersonaPayload,
@@ -219,7 +272,7 @@ async def test_anthropic_refusal_is_visible_and_not_retried(
         api_key_env="ANTHROPIC_API_KEY",
     )
     with pytest.raises(ProviderError) as captured:
-        await AnthropicProvider(config, timeout_seconds=30).generate(
+        await _isolated(AnthropicProvider(config, timeout_seconds=30)).generate(
             system_prompt="system",
             user_prompt="user",
             output_model=PersonaPayload,
@@ -264,7 +317,7 @@ async def test_openai_compatible_repairs_invalid_json_once(
         api_key_env="ROUTER_API_KEY",
         base_url="https://router.example/v1",
     )
-    result = await OpenAICompatibleProvider(config, timeout_seconds=30).generate(
+    result = await _isolated(OpenAICompatibleProvider(config, timeout_seconds=30)).generate(
         system_prompt="system",
         user_prompt="user",
         output_model=PersonaPayload,
@@ -315,7 +368,7 @@ async def test_codex_participant_runs_in_isolated_empty_directory(
         model="gpt-test",
         executable="codex",
     )
-    result = await CodexCliProvider(config, timeout_seconds=30).generate(
+    result = await _isolated(CodexCliProvider(config, timeout_seconds=30)).generate(
         system_prompt="system",
         user_prompt="architecture only",
         output_model=PersonaPayload,
@@ -326,4 +379,7 @@ async def test_codex_participant_runs_in_isolated_empty_directory(
     isolated = args[args.index("--cd") + 1]
     assert isolated == observed["cwd"]
     assert isolated != "/project/with/source"
+    assert "--ephemeral" in args
+    assert "--ignore-user-config" in args
+    assert "--ignore-rules" in args
     assert result.request_id == "codex-test"

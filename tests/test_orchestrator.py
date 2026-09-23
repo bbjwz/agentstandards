@@ -70,6 +70,17 @@ async def test_full_council_human_pause_resume_and_ready_gate(
     )
     assert "BEGIN PEER ARTIFACT" in planner_disclosed["visible_user_prompt"]
     assert '"underlying_vendor": "anthropic"' in planner_disclosed["visible_user_prompt"]
+    assert planner_independent["isolation"]["context_mode"] == "fresh"
+    assert planner_independent["isolation"]["prior_conversation_messages"] == 0
+    assert planner_independent["isolation"]["provider_session_reused"] is False
+    assert (
+        planner_independent["isolation"]["invocation_id"]
+        != planner_disclosed["isolation"]["invocation_id"]
+    )
+    assert (
+        planner_independent["isolation"]["adapter_instance_id"]
+        != planner_disclosed["isolation"]["adapter_instance_id"]
+    )
 
     approve_manifest(paths.decision_manifest)
 
@@ -83,7 +94,23 @@ async def test_full_council_human_pause_resume_and_ready_gate(
     assert final_state.phase == "ready"
     assert len(final_state.completed_artifact_ids) == 53
     assert paths.adr_log.exists()
-    assert len(list(paths.transcripts.rglob("*.attempt-*.json"))) == 53
+    attempt_paths = list(paths.transcripts.rglob("*.attempt-*.json"))
+    assert len(attempt_paths) == 53
+    attempts = [json.loads(path.read_text(encoding="utf-8")) for path in attempt_paths]
+    invocation_ids = [item["isolation"]["invocation_id"] for item in attempts]
+    adapter_instance_ids = [item["isolation"]["adapter_instance_id"] for item in attempts]
+    assert len(invocation_ids) == len(set(invocation_ids))
+    assert len(adapter_instance_ids) == len(set(adapter_instance_ids))
+    assert {item["isolation"]["context_mode"] for item in attempts} == {"fresh"}
+    assert all(item["isolation"]["prior_conversation_messages"] == 0 for item in attempts)
+    isolation_by_participant = {
+        record.participant_id: record for record in report.validator_isolation
+    }
+    assert set(isolation_by_participant) >= {"codex", "anthropic"}
+    assert all(
+        item.independent_invocation_id != item.disclosed_invocation_id
+        for item in isolation_by_participant.values()
+    )
     assert validate_run_offline(spec_project, spec_project / "specs" / "001-council") == []
 
     transcript_path = paths.transcript_path("planning", "independent", "systems-architect", "codex")
@@ -95,6 +122,14 @@ async def test_full_council_human_pause_resume_and_ready_gate(
     assert any(
         "output hash mismatch" in error for error in validate_run_offline(spec_project, feature_dir)
     )
+    transcript_path.write_text(original_transcript, encoding="utf-8")
+
+    tampered = json.loads(original_transcript)
+    tampered["isolation"]["invocation_id"] = planner_disclosed["isolation"]["invocation_id"]
+    transcript_path.write_text(json.dumps(tampered), encoding="utf-8")
+    isolation_errors = validate_run_offline(spec_project, feature_dir)
+    assert any("isolation mismatch" in error for error in isolation_errors)
+    assert any("reuses an inference invocation" in error for error in isolation_errors)
     transcript_path.write_text(original_transcript, encoding="utf-8")
 
     config = council_config()
@@ -210,9 +245,16 @@ async def test_transient_failure_retries_and_artifacts_remain_idempotent(
     spec_project: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     RetryOnceProvider.attempts = {}
+    adapter_instance_ids: list[str] = []
+
+    def build_retry_provider(config, timeout_seconds):  # type: ignore[no-untyped-def]
+        provider = RetryOnceProvider(config, timeout_seconds=timeout_seconds)
+        adapter_instance_ids.append(provider.adapter_instance_id)
+        return provider
+
     monkeypatch.setattr(
         "agentstandards.orchestrator.build_provider",
-        lambda config, timeout_seconds: RetryOnceProvider(config, timeout_seconds=timeout_seconds),
+        build_retry_provider,
     )
     config = council_config(retries=1)
     paths = await make_runner(spec_project, config).architect()
@@ -220,12 +262,15 @@ async def test_transient_failure_retries_and_artifacts_remain_idempotent(
     assert first.call_count == 96
     assert len(first.completed_artifact_ids) == 48
     assert len(list(paths.transcripts.rglob("*.attempt-*.json"))) == 96
+    assert len(adapter_instance_ids) == 96
+    assert len(adapter_instance_ids) == len(set(adapter_instance_ids))
 
     same_paths = await make_runner(spec_project, config).architect()
     second = load_state(same_paths)
     assert same_paths == paths
     assert second.call_count == first.call_count
     assert second.completed_artifact_ids == first.completed_artifact_ids
+    assert len(adapter_instance_ids) == 96
 
 
 class FailRequiredOnceProvider(FakeProvider):
