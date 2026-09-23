@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import tomllib
 import zipfile
 from pathlib import Path
 
@@ -8,6 +9,7 @@ import yaml
 from agentstandards.personas import load_personas
 
 from scripts.build_release import build
+from scripts.check_release_metadata import project_version
 
 
 def test_canonical_registry_contains_all_thirteen_personas() -> None:
@@ -28,14 +30,15 @@ def test_canonical_registry_contains_all_thirteen_personas() -> None:
 
 def test_release_archives_are_clean_and_installable_shape(tmp_path: Path) -> None:
     root = Path(__file__).resolve().parents[1]
+    version = project_version(root)
     artifacts = build(root, tmp_path)
     assert {path.name for path in artifacts} == {
-        "agentstandards-0.1.0.zip",
-        "agentstandards-gate-0.1.0.zip",
-        "agentstandards-bundle-0.1.0.zip",
+        f"agentstandards-{version}.zip",
+        f"agentstandards-gate-{version}.zip",
+        f"agentstandards-bundle-{version}.zip",
     }
     expected = {
-        "agentstandards-0.1.0.zip": {
+        f"agentstandards-{version}.zip": {
             "extension.yml",
             "commands/speckit.agentstandards.init.md",
             "runtime/agentstandards/personas.yml",
@@ -43,11 +46,11 @@ def test_release_archives_are_clean_and_installable_shape(tmp_path: Path) -> Non
             "scripts/powershell/agentstandards.ps1",
             "scripts/python/agentstandards.py",
         },
-        "agentstandards-gate-0.1.0.zip": {
+        f"agentstandards-gate-{version}.zip": {
             "preset.yml",
             "commands/speckit.tasks.md",
         },
-        "agentstandards-bundle-0.1.0.zip": {"bundle.yml", "README.md"},
+        f"agentstandards-bundle-{version}.zip": {"bundle.yml", "README.md"},
     }
     for artifact in artifacts:
         with zipfile.ZipFile(artifact) as archive:
@@ -58,6 +61,8 @@ def test_release_archives_are_clean_and_installable_shape(tmp_path: Path) -> Non
 
 def test_manifests_commands_and_catalogs_have_consistent_version() -> None:
     root = Path(__file__).resolve().parents[1]
+    with (root / "pyproject.toml").open("rb") as handle:
+        version = str(tomllib.load(handle)["project"]["version"])
     extension = yaml.safe_load((root / "extension.yml").read_text(encoding="utf-8"))
     preset = yaml.safe_load(
         (root / "presets" / "agentstandards-gate" / "preset.yml").read_text(encoding="utf-8")
@@ -75,7 +80,7 @@ def test_manifests_commands_and_catalogs_have_consistent_version() -> None:
         preset["preset"]["version"],
         workflow["workflow"]["version"],
         bundle["bundle"]["version"],
-    } == {"0.1.0"}
+    } == {version}
 
     for command in (root / "commands").glob("*.md"):
         text = command.read_text(encoding="utf-8")

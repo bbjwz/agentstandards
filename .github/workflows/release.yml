@@ -1,4 +1,4 @@
-name: Release Spec Kit artifacts
+name: Release distributions
 
 on:
   push:
@@ -6,25 +6,41 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
-      - name: Verify version tag
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.18"
+      - name: Verify version tag and release metadata
         run: |
-          version="$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")"
+          version="$(python3 scripts/check_release_metadata.py --print-version)"
           test "${GITHUB_REF_NAME}" = "v${version}"
       - name: Run offline verification
         run: |
-          uv sync --extra test
+          uv sync --extra test --locked
           uv run --extra test ruff check .
           uv run --extra test pytest
-      - name: Build release archives
-        run: uv run python scripts/build_release.py --output dist
+      - name: Build distributions
+        run: |
+          uv build
+          uv run python scripts/build_release.py --output dist
+      - name: Create checksums
+        working-directory: dist
+        run: sha256sum *.zip *.whl *.tar.gz > SHA256SUMS
+      - name: Attest release artifacts
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: "dist/*"
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${GITHUB_REF_NAME}" dist/*.zip --generate-notes
+        run: gh release create "${GITHUB_REF_NAME}" dist/* --generate-notes --verify-tag

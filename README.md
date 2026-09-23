@@ -1,5 +1,10 @@
 # Agentstandards
 
+[![CI](https://github.com/bbjwz/agentstandards/actions/workflows/ci.yml/badge.svg)](https://github.com/bbjwz/agentstandards/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/bbjwz/agentstandards)](https://github.com/bbjwz/agentstandards/releases)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/bbjwz/agentstandards/blob/main/LICENSE)
+
 Agentstandards is an MIT-licensed [GitHub Spec Kit](https://github.com/github/spec-kit)
 extension, workflow, and preset that inserts a multi-vendor architecture council between
 `$speckit-plan` and `$speckit-tasks`.
@@ -59,7 +64,7 @@ configuration or transcripts.
 
 ## Installation
 
-Until a tagged public release exists, install from a reviewed checkout:
+For development, install from a reviewed checkout:
 
 ```bash
 specify extension add /path/to/agentstandards --dev
@@ -85,8 +90,8 @@ Invoke `$speckit-agentstandards-init` in Codex, or run the deterministic helper 
 
 ```bash
 uv run --script .specify/extensions/agentstandards/scripts/python/agentstandards.py init \
-  --codex-model gpt-5.6-sol \
-  --anthropic-model claude-sonnet-4-5
+  --codex-model YOUR_EXACT_CODEX_MODEL_ID \
+  --anthropic-model YOUR_EXACT_ANTHROPIC_MODEL_ID
 ```
 
 Optional participants are passed as repeated JSON objects. Transport identity and underlying-vendor
@@ -94,9 +99,9 @@ identity are separate:
 
 ```bash
 uv run --script .specify/extensions/agentstandards/scripts/python/agentstandards.py init \
-  --codex-model gpt-5.6-sol \
-  --anthropic-model claude-sonnet-4-5 \
-  --provider-json '{"id":"google-via-abacus","transport":"openai-compatible","underlying_vendor":"google","model":"gemini-2.5-pro","api_key_env":"ABACUS_API_KEY","base_url":"https://routellm.abacus.ai/v1"}'
+  --codex-model YOUR_EXACT_CODEX_MODEL_ID \
+  --anthropic-model YOUR_EXACT_ANTHROPIC_MODEL_ID \
+  --provider-json '{"id":"google-via-abacus","transport":"openai-compatible","underlying_vendor":"google","model":"YOUR_EXACT_GOOGLE_MODEL_ID","api_key_env":"ABACUS_API_KEY","base_url":"https://routellm.abacus.ai/v1"}'
 ```
 
 `auto`, `default`, `route-llm`, and other unknown-routing model IDs are rejected for diversity
@@ -143,6 +148,13 @@ They exclude API keys, headers,
 hidden reasoning, and provider-internal state. High-confidence secret detection aborts before sending
 or persisting content.
 
+> [!WARNING]
+> Architecture transcripts can still contain confidential product, customer, or infrastructure
+> information. Agentstandards persists visible prompts and outputs so the gate can be audited, but it
+> does not decide who may see the surrounding Git repository. Review `specs/<feature>/architecture/`
+> before committing or sharing it, and run the council only in a repository with an appropriate
+> visibility and retention policy.
+
 The external context allowlist is limited to the Spec Kit constitution, feature specification, plan,
 research, data model, quickstart, contracts, and council-generated architecture artifacts. Symlinks,
 source paths, diffs, and task files are rejected.
@@ -163,5 +175,14 @@ uv run --extra test ruff check .
 uv run --extra test pytest
 ```
 
-See [the council design](docs/multi-vendor-council.md) and
-[the operational runbook](docs/pipeline-runbook.md) for more detail.
+See [the council design](https://github.com/bbjwz/agentstandards/blob/main/docs/multi-vendor-council.md)
+and [the operational runbook](https://github.com/bbjwz/agentstandards/blob/main/docs/pipeline-runbook.md)
+for more detail.
+
+## Community and security
+
+Contributions are welcome. Read the [contribution guide](https://github.com/bbjwz/agentstandards/blob/main/CONTRIBUTING.md)
+and [Code of Conduct](https://github.com/bbjwz/agentstandards/blob/main/CODE_OF_CONDUCT.md) before
+opening a pull request. Use GitHub Discussions for support and design questions. Report
+vulnerabilities privately by following the [security policy](https://github.com/bbjwz/agentstandards/blob/main/SECURITY.md),
+never through a public issue.

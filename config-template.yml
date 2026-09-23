@@ -56,6 +56,8 @@ limits:
   max_cost_usd: 100
 
 transcripts:
+  # Required for offline provenance validation. These files can contain confidential
+  # architecture information even after secret scanning; review them before Git commit or sharing.
   commit_visible_io: true
   include_response_envelope: false
   secret_scan: true
