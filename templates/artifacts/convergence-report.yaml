@@ -1,0 +1,42 @@
+schema_version: 1.0.0
+generated_at: "2026-01-01T00:00:00Z"
+source_phase: phase_13_converge
+spec_ref: artifacts/spec.yaml
+traceability_matrix_ref: artifacts/validation/traceability-matrix.yaml
+documentation_pack_ref: docs/final-documentation-pack.md
+codebase_snapshot_ref: ""
+alignment_summary:
+  fully_implemented: []
+  partially_implemented:
+    - requirement_id: REQ-001
+      implemented_pct: 0
+      gap_description: ""
+      evidence: ""
+  not_implemented:
+    - requirement_id: REQ-002
+      gap_description: ""
+      blocker: ""
+test_coverage_gaps:
+  - test_id: TST-001
+    status: missing
+    gap_description: ""
+documentation_drift:
+  - artifact: ""
+    drift_description: ""
+    severity: low
+deferred_work:
+  - item_id: DEFER-001
+    description: ""
+    related_requirement_id: REQ-001
+    recommended_action: ""
+    priority: medium
+production_feedback_inputs:
+  - input_id: PROD-001
+    source: ""
+    description: ""
+    suggested_spec_amendment: ""
+converge_gate:
+  critical_gaps_count: 0
+  blocking_deferred_count: 0
+  pipeline_rerun_required: false
+  notes: ""

@@ -10,6 +10,9 @@ Convert spec/raw-spec.md into a normalized YAML specification.
 ## Required Inputs
 - spec/raw-spec.md
 
+## Optional Inputs
+- spec/constitution.md (if present, apply its constraints and quality standards during normalization)
+
 ## Required Output
 - artifacts/spec.yaml using templates/artifacts/spec.yaml
 
@@ -17,7 +20,8 @@ Convert spec/raw-spec.md into a normalized YAML specification.
 1. Parse raw requirements into bounded and testable statements.
 2. Assign stable IDs REQ-001 onward.
 3. Extract constraints, non-goals, and acceptance criteria.
-4. Preserve unresolved ambiguities under open_questions.
+4. If spec/constitution.md exists, validate all requirements against its technology constraints and engineering principles. Flag conflicts in open_questions.
+5. Preserve unresolved ambiguities under open_questions.
 
 ## Hard-Fail Conditions
 - Missing requirement IDs.
@@ -25,4 +29,4 @@ Convert spec/raw-spec.md into a normalized YAML specification.
 - Constraints or non-goals omitted.
 
 ## Completion Criteria
-Output conforms to schema and is ready for parallel planning.
+Output conforms to schema and is ready for clarify (if open_questions present) or parallel planning.
