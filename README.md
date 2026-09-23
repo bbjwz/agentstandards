@@ -12,6 +12,15 @@ constitution → specify → clarify → plan
     → tasks → implementation
 ```
 
+This template enforces:
+
+- Structured adversarial review (not open-ended debate)
+- Deterministic phase progression
+- YAML-first intermediate artifacts
+- Strict fail gates on unresolved blockers and traceability gaps
+- Full artifact chain coverage: Requirement -> Use Case -> Sequence -> Test
+- Closed-loop feedback via a post-implementation convergence phase
+
 Codex is the only orchestrator and the mandatory OpenAI participant. Anthropic is the mandatory
 external participant. Google and OpenAI-compatible transports such as Abacus RouteLLM and
 OpenRouter are optional, but every enabled participant runs every architecture persona. External
@@ -50,6 +59,14 @@ different model server or set of weights.
 - Spec Kit 1.0.8 or newer, below 2.0
 - An Anthropic API key exposed through the configured environment-variable name
 
+### Migration-reference assets
+
+The older Copilot-oriented workflow remains available for migration and comparison. It includes
+phase-prefixed prompts and skills from ingestion through convergence, an optional clarification
+phase, a post-implementation convergence phase, and YAML contracts for the constitution,
+clarification log, and convergence report. These assets live under `.github/`, `templates/`,
+`ai-logs.md`, and `ai-plan.md`; the Spec Kit extension remains the supported runtime.
+
 Provider credentials are read only from environment variables. They are never written to project
 configuration or transcripts.
 
@@ -62,6 +79,25 @@ specify extension add /path/to/agentstandards --dev
 specify preset add --dev /path/to/agentstandards/presets/agentstandards-gate
 specify workflow add /path/to/agentstandards/workflows/agentstandards-architecture --dev
 ```
+
+### Legacy gate conditions
+
+The deprecated Copilot workflow stops when any of the following occur:
+
+- missing required phase input artifacts
+- schema mismatch against `templates/artifacts/*.yaml`
+- unresolved blocking ADRs
+- traceability gaps in Requirement -> Use Case -> Sequence -> Test
+- unresolved critical open questions during clarify gate (phase_00b)
+- critical requirement not implemented without documented blocker during converge gate (phase_13)
+
+## Production Feedback Loop
+
+When the system is in production, the pipeline supports a closed feedback loop:
+
+1. Incidents and recurring error patterns are appended to `spec/raw-spec.md` as amendments.
+2. The convergence report (`artifacts/validation/convergence-report.yaml`) is reviewed each sprint.
+3. If `converge_gate.pipeline_rerun_required: true`, the pipeline reruns from `/phase-ingest-spec`.
 
 Tagged releases publish Spec Kit archives and catalogs. A catalog-backed bundle install is:
 
@@ -164,6 +200,9 @@ uv run --extra test pytest
 The original `.github/agents`, `.github/prompts`, and `.github/skills` Copilot-oriented assets remain
 as migration references. They are deprecated entrypoints. `runtime/agentstandards/personas.yml` is now
 the authoritative persona registry, and the Spec Kit extension commands are the supported runtime.
+The legacy skills remain portable for teams that need a staged migration, including constitution,
+clarification, convergence, and requirement-to-test traceability assets. Context7 integration remains
+deferred; see `ai-logs.md` for the original Spec Kit/OpenSpec analysis.
 
 See [the council design](docs/multi-vendor-council.md) and
 [the operational runbook](docs/pipeline-runbook.md) for more detail.

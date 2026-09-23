@@ -2,6 +2,11 @@
 
 ## 1. Install and configure
 
+Before the first council run, establish the project constitution with Spec Kit. Teams migrating from
+the older Copilot workflow can copy `templates/spec/constitution.md` to `spec/constitution.md`; its
+technology constraints, engineering principles, quality standards, and compliance requirements are
+consumed by the legacy ingestion and clarification phases.
+
 Install the extension, task-gate preset, and workflow. Run `$speckit-agentstandards-init` once per
 project. Pin exact models, declare the actual underlying vendor separately from any gateway, and
 configure only environment-variable names for credentials.
@@ -62,3 +67,33 @@ Missing, invalid, awaiting, or blocked reports stop task generation before `task
 - Re-running a partial phase reuses artifacts only when the full visible input hash matches.
 - Changed Spec Kit inputs or participant configuration require a new run.
 - Never edit provider artifacts or transcripts. Human authority belongs in the decision manifest.
+
+## 8. Legacy Copilot migration workflow
+
+The deprecated Copilot assets remain available for staged migrations. Bootstrap `spec/raw-spec.md`
+and the artifact directories, then run these compatibility skills in order:
+
+1. `/phase-ingest-spec`
+2. `/phase-clarify` when `spec.yaml` contains open questions
+3. `/phase-parallel-planning`
+4. `/phase-critique-round-1`
+5. `/phase-plan-revision`
+6. `/phase-cross-critique`
+7. `/phase-second-critique`
+8. `/phase-consensus-synthesis`
+9. `/phase-architecture-validation`
+10. `/phase-use-case-generation`
+11. `/phase-sequence-generation`
+12. `/phase-test-generation`
+13. `/phase-coverage-validation`
+14. `/phase-documentation-pack`
+15. `/phase-converge`
+
+The compatibility pipeline fails on missing inputs, artifact-schema mismatches, unresolved blocking
+ADRs, requirement-traceability gaps, unresolved critical clarification questions, or critical
+requirements classified as `not_implemented` without a documented blocker. Keep rejected
+alternatives and unresolved tradeoffs documented; bypass a gate only through an explicit exception.
+
+In production, review `artifacts/validation/convergence-report.yaml` each sprint. When
+`converge_gate.pipeline_rerun_required` is true, attach the report and rerun from
+`/phase-ingest-spec`. Record new production requirements with new `REQ-*` identifiers.
