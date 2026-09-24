@@ -3,9 +3,9 @@ schema_version: "1.0"
 bundle:
   id: "agentstandards"
   name: "Agentstandards Multi-Vendor Architecture"
-  version: "0.1.0"
+  version: "0.1.1"
   role: "architecture-governance"
-  description: "Install the Agentstandards council, task gate, and Spec Kit architecture workflow together."
+  description: "Installs a Codex-orchestrated, multi-vendor architecture council, its hard task gate, and the supporting Spec Kit workflow."
   author: "bbjwz"
   license: "MIT"
 
@@ -14,18 +14,21 @@ requires:
   tools: ["uv", "codex"]
   mcp: []
 
+integration:
+  id: "codex"
+
 provides:
   extensions:
     - id: "agentstandards"
-      version: "0.1.0"
+      version: "0.1.1"
   presets:
     - id: "agentstandards-gate"
-      version: "0.1.0"
+      version: "0.1.1"
       priority: 1
       strategy: "wrap"
   steps: []
   workflows:
     - id: "agentstandards-architecture"
-      version: "0.1.0"
+      version: "0.1.1"
 
 tags: ["architecture", "governance", "multi-vendor", "codex"]

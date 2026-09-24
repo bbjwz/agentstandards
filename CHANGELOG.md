@@ -6,6 +6,15 @@ versioning.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-24
+
+### Fixed
+
+- Declared the bundle's `codex` integration target and aligned its manifest, catalog, and submitted
+  description.
+- Declared the task-gate preset's required `agentstandards` extension dependency.
+- Added self-contained, release-pinned installation documentation for the bundle and preset.
+
 ## [0.1.0] - 2026-09-24
 
 ### Added
@@ -19,5 +28,6 @@ versioning.
   a hard `READY` gate before task generation.
 - Spec Kit extension, workflow, preset, bundle, catalogs, and offline verification.
 
-[Unreleased]: https://github.com/bbjwz/agentstandards/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/bbjwz/agentstandards/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/bbjwz/agentstandards/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/bbjwz/agentstandards/releases/tag/v0.1.0

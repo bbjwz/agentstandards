@@ -91,3 +91,47 @@ def test_manifests_commands_and_catalogs_have_consistent_version() -> None:
         catalog = json.loads(path.read_text(encoding="utf-8"))
         assert catalog["schema_version"] == "1.0"
         assert catalog["catalog_url"].startswith("https://")
+
+
+def test_preset_and_bundle_publish_review_contracts() -> None:
+    root = Path(__file__).resolve().parents[1]
+    preset = yaml.safe_load(
+        (root / "presets" / "agentstandards-gate" / "preset.yml").read_text(
+            encoding="utf-8"
+        )
+    )
+    bundle = yaml.safe_load(
+        (root / "bundles" / "agentstandards" / "bundle.yml").read_text(encoding="utf-8")
+    )
+    preset_catalog = json.loads(
+        (root / "catalogs" / "presets.json").read_text(encoding="utf-8")
+    )["presets"]["agentstandards-gate"]
+    bundle_catalog = json.loads(
+        (root / "catalogs" / "bundles.json").read_text(encoding="utf-8")
+    )["bundles"]["agentstandards"]
+
+    assert preset["requires"]["extensions"] == ["agentstandards"]
+    assert preset_catalog["requires"]["extensions"] == ["agentstandards"]
+    assert preset_catalog["documentation"].endswith(
+        "/presets/agentstandards-gate/README.md"
+    )
+    preset_readme = (
+        root / "presets" / "agentstandards-gate" / "README.md"
+    ).read_text(encoding="utf-8")
+    assert "specify preset add" in preset_readme
+    assert f'agentstandards-gate-{preset["preset"]["version"]}.zip' in preset_readme
+
+    assert bundle["integration"] == {"id": "codex"}
+    assert bundle_catalog["description"] == bundle["bundle"]["description"]
+
+    bundle_readme = (root / "bundles" / "agentstandards" / "README.md").read_text(
+        encoding="utf-8"
+    )
+    for required_command in (
+        "specify extension catalog add",
+        "specify preset catalog add",
+        "specify workflow catalog add",
+        "specify bundle catalog add",
+        "specify bundle install agentstandards --integration codex",
+    ):
+        assert required_command in bundle_readme
