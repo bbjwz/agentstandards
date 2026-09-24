@@ -3,7 +3,7 @@ schema_version: "1.0"
 workflow:
   id: "agentstandards-architecture"
   name: "Spec Kit Multi-Vendor Architecture Council"
-  version: "0.1.0"
+  version: "0.1.1"
   author: "bbjwz"
   description: "Runs specification, clarification, planning, a human-gated architecture council, validation, and task generation with Codex orchestration."
 

@@ -1,18 +1,18 @@
 {
   "schema_version": "1.0",
   "updated_at": "2026-09-24T00:00:00Z",
-  "catalog_url": "https://raw.githubusercontent.com/bbjwz/agentstandards/v0.1.0/catalogs/extensions.json",
+  "catalog_url": "https://raw.githubusercontent.com/bbjwz/agentstandards/v0.1.1/catalogs/extensions.json",
   "extensions": {
     "agentstandards": {
       "name": "Agentstandards Architecture Council",
       "id": "agentstandards",
       "description": "A Codex-orchestrated, multi-vendor architecture council with human decisions and a hard pre-tasks gate.",
       "author": "bbjwz",
-      "version": "0.1.0",
-      "download_url": "https://github.com/bbjwz/agentstandards/releases/download/v0.1.0/agentstandards-0.1.0.zip",
+      "version": "0.1.1",
+      "download_url": "https://github.com/bbjwz/agentstandards/releases/download/v0.1.1/agentstandards-0.1.1.zip",
       "repository": "https://github.com/bbjwz/agentstandards",
       "homepage": "https://github.com/bbjwz/agentstandards",
-      "documentation": "https://github.com/bbjwz/agentstandards/blob/v0.1.0/README.md",
+      "documentation": "https://github.com/bbjwz/agentstandards/blob/v0.1.1/README.md",
       "license": "MIT",
       "category": "process",
       "effect": "read-write",

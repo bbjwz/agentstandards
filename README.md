@@ -75,10 +75,10 @@ specify workflow add /path/to/agentstandards/workflows/agentstandards-architectu
 Tagged releases publish Spec Kit archives and catalogs. A catalog-backed bundle install is:
 
 ```bash
-specify extension catalog add https://raw.githubusercontent.com/bbjwz/agentstandards/v0.1.0/catalogs/extensions.json --name agentstandards --install-allowed
-specify preset catalog add https://raw.githubusercontent.com/bbjwz/agentstandards/v0.1.0/catalogs/presets.json --name agentstandards --install-allowed
-specify workflow catalog add https://raw.githubusercontent.com/bbjwz/agentstandards/v0.1.0/catalogs/workflows.json --name agentstandards
-specify bundle catalog add https://raw.githubusercontent.com/bbjwz/agentstandards/v0.1.0/catalogs/bundles.json --id agentstandards --policy install-allowed
+specify extension catalog add https://raw.githubusercontent.com/bbjwz/agentstandards/v0.1.1/catalogs/extensions.json --name agentstandards --install-allowed
+specify preset catalog add https://raw.githubusercontent.com/bbjwz/agentstandards/v0.1.1/catalogs/presets.json --name agentstandards --install-allowed
+specify workflow catalog add https://raw.githubusercontent.com/bbjwz/agentstandards/v0.1.1/catalogs/workflows.json --name agentstandards
+specify bundle catalog add https://raw.githubusercontent.com/bbjwz/agentstandards/v0.1.1/catalogs/bundles.json --id agentstandards --policy install-allowed
 specify bundle install agentstandards
 ```
 

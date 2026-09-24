@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: "agentstandards"
   name: "Agentstandards Architecture Council"
-  version: "0.1.0"
+  version: "0.1.1"
   description: "Run a bounded, multi-vendor architecture council between Spec Kit planning and task generation."
   category: "process"
   effect: "read-write"

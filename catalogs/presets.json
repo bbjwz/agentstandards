@@ -1,19 +1,22 @@
 {
   "schema_version": "1.0",
   "updated_at": "2026-09-24T00:00:00Z",
-  "catalog_url": "https://raw.githubusercontent.com/bbjwz/agentstandards/v0.1.0/catalogs/presets.json",
+  "catalog_url": "https://raw.githubusercontent.com/bbjwz/agentstandards/v0.1.1/catalogs/presets.json",
   "presets": {
     "agentstandards-gate": {
       "name": "Agentstandards Task Gate",
       "id": "agentstandards-gate",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "description": "Wraps speckit.tasks with the persisted Agentstandards architecture gate.",
       "author": "bbjwz",
       "repository": "https://github.com/bbjwz/agentstandards",
-      "download_url": "https://github.com/bbjwz/agentstandards/releases/download/v0.1.0/agentstandards-gate-0.1.0.zip",
-      "documentation": "https://github.com/bbjwz/agentstandards/blob/v0.1.0/README.md",
+      "download_url": "https://github.com/bbjwz/agentstandards/releases/download/v0.1.1/agentstandards-gate-0.1.1.zip",
+      "documentation": "https://github.com/bbjwz/agentstandards/blob/v0.1.1/presets/agentstandards-gate/README.md",
       "license": "MIT",
-      "requires": {"speckit_version": ">=1.0.8,<2.0.0"},
+      "requires": {
+        "speckit_version": ">=1.0.8,<2.0.0",
+        "extensions": ["agentstandards"]
+      },
       "provides": {"templates": 0, "commands": 1},
       "tags": ["architecture", "gate", "multi-vendor", "tasks"]
     }
